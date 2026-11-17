@@ -53,7 +53,7 @@ var CSS=[
 '.x-gt-deg.hit{color:var(--ok)}',
 '.x-gt-step{display:grid;grid-template-columns:1fr 1fr;gap:8px}.x-gt-step button{padding:0 6px}',
 /* fake */
-'.x-gt-deck{height:360px}',
+'.x-gt-deck{height:340px}',
 '.x-gt-fc{align-items:stretch;justify-content:flex-start;text-align:left;gap:10px;padding:52px 16px 16px}',
 '.x-gt-src{display:flex;align-items:center;gap:10px}',
 '.x-gt-av{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--sf2);border:1px solid var(--ln)}',
@@ -62,7 +62,11 @@ var CSS=[
 '.x-gt-bub.sys{border-radius:14px;background:#2A2516;border-color:rgba(242,194,48,.45)}',
 '.x-gt-fc .x-gt-hint{text-align:center;margin:0}',
 '.x-gt-flags{display:flex;flex-wrap:wrap;gap:6px}.x-gt-flags span{font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;border:1px solid currentColor;animation:pop .35s var(--ease) backwards}',
-'.msg.no .x-gt-flags span{color:#F6B9AD}.msg.ok .x-gt-flags span{color:#B9E6BB}',
+'.x-gt-flags.f span{color:#F6B9AD}.x-gt-flags.t span{color:#B9E6BB}',
+'.x-gt-exp{position:absolute;inset:0;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px;overflow:auto;animation:pop .4s var(--ease)}',
+'.x-gt-exp.ok{background:linear-gradient(160deg,#1F3320,#141A12);border:1px solid var(--ok)}.x-gt-exp.no{background:linear-gradient(160deg,#36211C,#1A1311);border:1px solid var(--bad)}',
+'.x-gt-exp h2{font-size:22px}.x-gt-exp .x-gt-v{font-family:Oswald,sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase}',
+'.x-gt-exp .x-gt-go{margin-top:auto}',
 /* first aid */
 '.x-gt-ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}',
 '.x-gt-li{display:grid;grid-template-columns:40px 1fr 44px;align-items:center;gap:8px;padding:8px 6px 8px 8px;border-radius:14px;border:1px solid var(--ln);background:linear-gradient(180deg,#1E2218,#161912);user-select:none;-webkit-user-select:none;cursor:grab;position:relative;animation:up .45s var(--ease) backwards}',
@@ -105,22 +109,22 @@ var LMK=[['🌳','Старий дуб'],['🌉','Місток'],['⛪','Капл
 var DIRN=[[0,'північ'],[45,'північний схід'],[90,'схід'],[135,'південний схід'],[180,'південь'],[225,'південний захід'],[270,'захід'],[315,'північний захід']];
 function azPt(az,d){var r=az*Math.PI/180;return {x:160+Math.sin(r)*d*K,y:160-Math.cos(r)*d*K};}
 function azGen(r){var lv=r<2?0:r<4?1:2;
-  for(var t=0;t<120;t++){var az,d,ds=[];
+  for(var t=0;t<600;t++){var az,d,ds=[];
     if(lv===0){az=pick([0,90,180,270]);d=pick([200,250,300]);[90,180,270].forEach(function(o){ds.push([(az+o)%360,pick([150,200,250,300])]);});}
     else if(lv===1){az=pick([45,135,225,315,30,60,120,150,210,240,300,330]);d=pick([200,250,300,350]);ds.push([az,d>=250?d-150:d+150]);ds.push([(az+45)%360,d]);ds.push([(az+315)%360,pick([150,250,300])]);}
-    else{az=5*(1+Math.floor(Math.random()*71));if(az%45===0)continue;d=pick([250,300,350]);ds.push([norm(az+pick([25,-25])),d]);ds.push([az,d>250?d-100:d+100]);ds.push([norm(az+pick([40,-40])),d+pick([50,-50])]);}
+    else{az=5*(1+Math.floor(Math.random()*71));if(az%45===0)continue;d=pick([250,300,350]);ds.push([norm(az+pick([25,-25])),d]);ds.push([az,d>250?d-120:d+100]);ds.push([norm(az+pick([40,-40])),d>=300?d-pick([50,100]):d+50]);}
     var all=[[az,d]].concat(ds),pts=all.map(function(a){return azPt(a[0],a[1]);}),ok=true;
     for(var i=0;i<pts.length&&ok;i++){var p=pts[i];
-      if(p.x<26||p.x>294||p.y<26||p.y>290)ok=false;
+      if(p.x<26||p.x>294||p.y<26||p.y>278)ok=false;
       if(p.x>262&&p.y<70)ok=false;           /* north arrow */
-      if(p.x<150&&p.y>272)ok=false;          /* scale bar */
+      if(p.x<165&&p.y>258)ok=false;          /* scale bar */
       if(hyp(p.x-160,p.y-160)<52)ok=false;
       for(var j=0;j<i;j++)if(hyp(p.x-pts[j].x,p.y-pts[j].y)<46)ok=false;}
     if(ok)return {az:az,d:d,lv:lv,pts:pts};}
   return {az:90,d:250,lv:0,pts:[azPt(90,250),azPt(180,250),azPt(270,200),azPt(0,300)]};}
 function azMapSvg(){var g='',i;
   for(i=0;i<=320;i+=40)g+='<line x1="'+i+'" y1="0" x2="'+i+'" y2="320"/><line x1="0" y1="'+i+'" x2="320" y2="'+i+'"/>';
-  var ticks='';for(i=1;i<=3;i++)ticks+='<line x1="-6" y1="'+(-i*40)+'" x2="6" y2="'+(-i*40)+'" stroke="#F2C230" stroke-width="2"/><text x="10" y="'+(-i*40+4)+'" fill="#F2C230" font-size="10" font-weight="600" font-family="Inter" paint-order="stroke" stroke="#141810" stroke-width="3">'+(i*100)+' м</text>';
+  var ticks='',labs='';for(i=1;i<=3;i++){ticks+='<line x1="-6" y1="'+(-i*40)+'" x2="6" y2="'+(-i*40)+'" stroke="#F2C230" stroke-width="2"/>';labs+='<text class="x-gt-rl" data-i="'+i+'" x="0" y="0" text-anchor="middle" dominant-baseline="middle" fill="#F2C230" font-size="10" font-weight="600" font-family="Inter" paint-order="stroke" stroke="#141810" stroke-width="3">'+(i*100)+' м</text>';}
   return '<svg viewBox="0 0 320 320" role="img" aria-label="Карта місцевості в масштабі 1:10 000, північ угорі. Сітка: одна клітинка — 100 метрів.">'+
   '<defs><pattern id="x-gt-tr" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.3" fill="#4C6B3A"/></pattern></defs>'+
   '<rect width="320" height="320" fill="#1A1F15"/>'+
@@ -143,7 +147,7 @@ function azMapSvg(){var g='',i;
   '<text x="0" y="17" fill="#EDEBE2" font-size="9" font-family="Inter">0</text><text x="40" y="17" fill="#EDEBE2" font-size="9" font-family="Inter" text-anchor="middle">100</text><text x="120" y="17" fill="#EDEBE2" font-size="9" font-family="Inter" text-anchor="middle">300 м</text>'+
   '<text x="0" y="-5" fill="#A9AD9D" font-size="9" font-family="Inter">1:10 000</text></g>'+
   /* bearing ray from start, rotated with compass */
-  '<g class="x-gt-ray" id="x-gt-ray" transform="rotate(0 160 160)"><g transform="translate(160 160)"><line class="m" x1="0" y1="0" x2="0" y2="-150"/>'+ticks+'</g></g>'+
+  '<g class="x-gt-ray" id="x-gt-ray" transform="rotate(0 160 160)"><g transform="translate(160 160)"><line class="m" x1="0" y1="0" x2="0" y2="-150"/>'+ticks+'</g></g><g id="x-gt-rls">'+labs+'</g>'+
   /* start: orienteering triangle */
   '<g transform="translate(160 160)"><circle r="14" fill="none" stroke="#F2C230" stroke-opacity=".35"><animate attributeName="r" values="10;20;10" dur="2.4s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values=".6;0;.6" dur="2.4s" repeatCount="indefinite"/></circle><path d="M0-9L8 6H-8Z" fill="none" stroke="#F2C230" stroke-width="2.5" stroke-linejoin="round"/></g>'+
   '<text x="160" y="182" text-anchor="middle" fill="#F2C230" font-size="10" font-weight="700" font-family="Inter" paint-order="stroke" stroke="#141810" stroke-width="3">СТАРТ</text>'+
@@ -167,7 +171,7 @@ function startAzimuth(box,A){css();var R=6,r=0,score=0,right=0,cur=null,busy=fal
   '<div class="stack" style="gap:8px"><span class="sm mu">Твій курс</span><span class="x-gt-deg" id="x-gt-deg" aria-hidden="true">0°</span><div class="x-gt-step"><button data-x="-5" aria-label="Повернути на 5 градусів проти годинникової">−5°</button><button data-x="5" aria-label="Повернути на 5 градусів за годинниковою">+5°</button></div><span class="sm mu">Тягни компас по колу або стрілками клавіатури</span></div></div>'+
   '<div class="toast" id="x-gt-tst" role="status" aria-live="polite"></div><div id="x-gt-nx"></div></div>';
   var map=$('#x-gt-map',box),comp=$('#x-gt-comp',box),ray=$('#x-gt-ray',box),dir=$('#x-gt-dir',box),ndl=$('#x-gt-ndl',box),deg=$('#x-gt-deg',box),tst=$('#x-gt-tst',box);
-  function setAng(v,final){ang=norm(Math.round(v));dir.setAttribute('transform','rotate('+ang+' 100 100)');ray.setAttribute('transform','rotate('+ang+' 160 160)');
+  function setAng(v,final){ang=norm(Math.round(v));dir.setAttribute('transform','rotate('+ang+' 100 100)');ray.setAttribute('transform','rotate('+ang+' 160 160)');$$('.x-gt-rl',map).forEach(function(t){var n=+t.getAttribute('data-i'),q=azPt(ang,n*100),pa=(ang+90)*Math.PI/180;t.setAttribute('x',(q.x+Math.sin(pa)*22).toFixed(1));t.setAttribute('y',(q.y-Math.cos(pa)*22).toFixed(1));});
     deg.textContent=ang+'°';comp.setAttribute('aria-valuenow',ang);comp.setAttribute('aria-valuetext',ang+' градусів');
     deg.className='x-gt-deg'+(cur&&angDiff(ang,cur.az)<=3?' hit':'');
     if(final){sway=1-sway;ndl.setAttribute('class','x-gt-needle'+(sway?' s':''));}}
@@ -233,10 +237,9 @@ function startFake(box,A){css();var deck=A.shuffle(FAKES),i=0,right=0,busy=false
   function decide(v){if(busy)return;busy=true;btns(true);var t=deck[i],ok=v===t[4];
     card.classList.add('fly');card.style.transform='translateX('+(v?440:-440)+'px) rotate('+(v?26:-26)+'deg)';card.style.opacity=0;
     if(ok){right++;var sc=$('#x-gt-sc',box);sc.textContent=(right*3)+' балів';sc.classList.remove('b');void sc.offsetWidth;sc.classList.add('b');}
-    ex.innerHTML='<div class="msg '+(ok?'ok':'no')+' stack" style="gap:8px"><b>'+(ok?'Правильно! ':'Не зовсім. ')+(t[4]?'Це правда / безпечно.':'Це фейк / небезпечно.')+'</b><span>'+A.esc(t[5])+'</span>'+
-      '<div class="x-gt-flags">'+t[6].map(function(f,n){return '<span style="animation-delay:'+(.1+n*.06)+'s">'+(t[4]?'✓ ':'⚑ ')+A.esc(f)+'</span>';}).join('')+'</div></div>'+
-      '<button class="pri x-gt-next x-gt-go" style="width:100%;margin-top:12px">'+(i+1>=deck.length?'Підсумок':'Далі →')+'</button>';
-    A.later(function(){var g=$('.x-gt-go',box);if(g){g.focus({preventScroll:true});g.scrollIntoView({behavior:'smooth',block:'nearest'});}},450);}
+    A.later(function(){dk.innerHTML='<div class="x-gt-exp '+(ok?'ok':'no')+'" role="status"><span class="x-gt-v" style="color:'+(t[4]?'var(--ok)':'var(--bad)')+'">'+(t[4]?'✓ Правда / безпечно':'⚑ Фейк / небезпечно')+'</span><h2>'+(ok?'Правильно!':'Не зовсім')+'</h2><span>'+A.esc(t[5])+'</span>'+
+      '<div class="x-gt-flags '+(t[4]?'t':'f')+'">'+t[6].map(function(f,n){return '<span style="animation-delay:'+(.15+n*.07)+'s">'+A.esc(f)+'</span>';}).join('')+'</div>'+
+      '<button class="pri x-gt-go" style="width:100%">'+(i+1>=deck.length?'Підсумок':'Далі →')+'</button></div>';var g=$('.x-gt-go',box);if(g)g.focus({preventScroll:true});},380);}
   box.addEventListener('click',function(e){var b=e.target.closest('.x-gt-fb');if(b&&!busy){decide(+b.getAttribute('data-v'));return;}if(e.target.closest('.x-gt-go')){i++;show();}});
   show();
   return function(){busy=true;drag=false;};}

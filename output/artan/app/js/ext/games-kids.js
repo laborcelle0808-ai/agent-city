@@ -49,9 +49,8 @@ s.textContent=[
 '@keyframes x-gk-bump{30%{transform:scale(.9,1.08) rotate(-6deg)}60%{transform:scale(1.05,.95) rotate(4deg)}}',
 '@keyframes x-gk-in{30%{transform:translateY(-6px) scale(.95,1.08)}100%{transform:translateY(6px) scale(.2);opacity:0}}',
 '@keyframes x-gk-wink{0%,92%,100%{transform:none}95%{transform:scaleY(.1)}}',
-'.x-gk-pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,56px);gap:8px;justify-content:center}',
+'.x-gk-pad{display:grid;grid-template-columns:repeat(4,64px);grid-auto-rows:52px;gap:8px;justify-content:center}',
 '.x-gk-pad button{min-height:0;padding:0;font-size:22px;border-radius:16px}',
-'.x-gk-pad [data-x="u"]{grid-column:2}.x-gk-pad [data-x="l"]{grid-column:1;grid-row:2}.x-gk-pad [data-x="d"]{grid-column:2;grid-row:2}.x-gk-pad [data-x="r"]{grid-column:3;grid-row:2}',
 '.x-gk-legend{display:flex;justify-content:center;gap:16px;font-size:12.5px;color:var(--mu)}.x-gk-legend span{display:inline-flex;align-items:center;gap:6px}.x-gk-legend svg{width:22px;height:22px;border-radius:5px}',
 '.x-gk-lv{display:flex;gap:6px}.x-gk-lv i{width:22px;height:6px;border-radius:4px;background:var(--sf2);transition:background .4s}.x-gk-lv i.on{background:var(--ye)}',
 /* hazard scenes */
@@ -84,15 +83,15 @@ s.textContent=[
 '.x-gk-cnt i.on{border:2px solid var(--ye);background:var(--ye);animation:bump .35s}',
 '.x-gk-cnt i.on:after{content:"";width:9px;height:5px;border-left:2.5px solid #14110A;border-bottom:2.5px solid #14110A;transform:translateY(-1px) rotate(-45deg)}',
 /* aid kit */
-'.x-gk-kitw{display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;border-radius:18px;border:1px dashed #6E7463;background:radial-gradient(circle at 50% 60%,#1E2318,#12140E);transition:border-color .2s,background .2s}',
+'.x-gk-kitw{display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 10px;border-radius:18px;border:1px dashed #6E7463;background:radial-gradient(circle at 50% 60%,#1E2318,#12140E);transition:border-color .2s,background .2s}',
 '.x-gk-kitw.over{border-color:var(--ye);border-style:solid;background:radial-gradient(circle at 50% 60%,#2A2A16,#12140E)}',
-'.x-gk-kit{width:118px;height:96px;flex:none;overflow:visible}',
+'.x-gk-kit{width:110px;height:88px;flex:none;overflow:visible}',
 '.x-gk-kit .x-gk-lid{transform-box:fill-box;transform-origin:50% 100%;transition:transform .3s var(--ease)}',
 '.x-gk-kitw.over .x-gk-lid{transform:translateY(-6px) rotate(-8deg)}',
 '.x-gk-kit.b{animation:bump .35s}',
 '.x-gk-kit.no{animation:shake .35s}',
 '.x-gk-items{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}',
-'.x-gk-it{flex-direction:column;min-height:96px;gap:4px;font-size:12.5px;font-weight:500;padding:8px 4px;border-radius:16px;touch-action:none;user-select:none;-webkit-user-select:none;animation:pop .4s var(--ease) backwards;cursor:grab;line-height:1.15}',
+'.x-gk-it{flex-direction:column;min-height:88px;gap:4px;font-size:12.5px;font-weight:500;padding:8px 4px;border-radius:16px;touch-action:none;user-select:none;-webkit-user-select:none;animation:pop .4s var(--ease) backwards;cursor:grab;line-height:1.15}',
 '.x-gk-it svg{width:44px;height:44px;display:block;pointer-events:none}',
 '.x-gk-it.x-gk-lift{opacity:.25;transform:scale(.92)}',
 '.x-gk-it.done{opacity:0;transform:scale(.3);pointer-events:none;transition:opacity .3s,transform .3s}',
@@ -106,7 +105,7 @@ s.textContent=[
 '.x-gk-mode .x-gk-mini{width:84px;height:84px;display:grid;gap:2px;border-radius:10px;overflow:hidden}',
 '.x-gk-mode .x-gk-mini i{background:#2A2F21}',
 '.x-gk-mode b{font-family:Oswald,sans-serif;font-size:22px;color:var(--ye)}',
-'.x-gk-board{position:relative;display:grid;gap:3px;padding:6px;border-radius:18px;border:1px solid var(--ln);background:#0E100B;width:100%;max-width:340px;margin:0 auto;aspect-ratio:1;transition:gap .5s var(--ease),padding .5s var(--ease)}',
+'.x-gk-board{position:relative;display:grid;gap:3px;padding:6px;border-radius:18px;border:1px solid var(--ln);background:#0E100B;width:100%;max-width:300px;margin:0 auto;aspect-ratio:1;transition:gap .5s var(--ease),padding .5s var(--ease)}',
 '.x-gk-board:before{content:"";position:absolute;inset:6px;border-radius:12px;background:url(img/emblem.png) center/contain no-repeat,radial-gradient(circle,#2A2F21,#14160F 70%);opacity:.22;transition:opacity .25s;pointer-events:none}',
 '.x-gk-board.peek:before{opacity:.75}',
 '.x-gk-slot{position:relative;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(195,199,154,.18);transition:box-shadow .2s,background .2s}',
@@ -213,13 +212,13 @@ box.innerHTML='<div class="view stack" id="x-gk-sh">'+A.gHead('Шлях до у�
 '<div class="x-gk-maze" id="x-gk-mz" role="application" aria-label="Лабіринт. Керуй стрілками, свайпом або кнопками."></div>'+
 '<div class="x-gk-legend"><span>'+DOOR+'Укриття</span><span>'+GLASS+'Вікно — обходь</span></div>'+
 '<div class="x-gk-tip" id="x-gk-tip" role="status" aria-live="polite">Свайпни, торкнись поруч із другом або натисни стрілку</div>'+
-'<div class="x-gk-pad"><button data-x="u" aria-label="Вгору">↑</button><button data-x="l" aria-label="Ліворуч">←</button><button data-x="d" aria-label="Вниз">↓</button><button data-x="r" aria-label="Праворуч">→</button></div></div>';
+'<div class="x-gk-pad"><button data-x="l" aria-label="Ліворуч">←</button><button data-x="u" aria-label="Вгору">↑</button><button data-x="d" aria-label="Вниз">↓</button><button data-x="r" aria-label="Праворуч">→</button></div></div>';
 root=q('#x-gk-sh',box);maze=q('#x-gk-mz',box);tip=q('#x-gk-tip',box);
 function say(t,k){tip.className='x-gk-tip'+(k?' '+k:'');void tip.offsetWidth;tip.textContent=t;}
-function build(){grid=LEVELS[lv];R=grid.length;C=grid[0].length;cells=[];
+function build(){/* outer wall ring is implied by the board frame */grid=LEVELS[lv].slice(1,-1).map(function(r){return r.slice(1,-1);});R=grid.length;C=grid[0].length;cells=[];
 var h='';for(var y=0;y<R;y++)for(var x=0;x<C;x++){var t=grid[y][x];if(t==='S'){px=x;py=y;}
 h+='<div class="x-gk-c'+(t==='#'?' w':t==='G'?' g':t==='H'?' h':'')+'" data-t="'+t+'">'+(t==='G'?GLASS:t==='H'?DOOR:'')+'</div>';}
-maze.style.gridTemplateColumns='repeat('+C+',1fr)';maze.style.maxWidth=(C*52)+'px';
+maze.style.gridTemplateColumns='repeat('+C+',1fr)';maze.style.maxWidth=(C*51+12)+'px';
 maze.innerHTML=h+'<div class="x-gk-pl" id="x-gk-pl">'+KID+'</div>';pl=q('#x-gk-pl',maze);cells=maze.querySelectorAll('.x-gk-c');
 var lvs=root.querySelectorAll('.x-gk-lv i');for(var i=0;i<lvs.length;i++)lvs[i].className=i<=lv?'on':'';
 place(true);busy=false;
@@ -251,6 +250,7 @@ root.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(
 if(x==='snd'){var on=snd.toggle();b.textContent='Звук: '+(on?'так':'ні');b.setAttribute('aria-pressed',on);return;}
 var m={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]}[x];if(m)move(m[0],m[1]);});
 build();
+A.later(function(){var h=q('.x-gk-hud',root);if(h&&window.innerHeight<1000){var y=h.getBoundingClientRect().top+(window.pageYOffset||0)-12;try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}}},500);
 return function(){over=true;window.removeEventListener('keydown',key);window.removeEventListener('resize',rs);snd.close();};}
 
 /* ======================================================================
@@ -320,7 +320,7 @@ svg:function(){return ''+
 '<g fill="#F2C230"><ellipse cx="246" cy="218" rx="3.5" ry="2.2"/><ellipse cx="254" cy="213" rx="3.5" ry="2.2"/></g><g fill="#EDEBE2"><circle cx="250" cy="222" r="2.6"/><circle cx="240" cy="224" r="2.6"/></g>';}},
 {name:'Двір',hz:[
  [hz(0,312,200,28,'Незнайомий предмет у траві'),'Незнайомий предмет не чіпай! Відійди й одразу скажи дорослим.'],
- [hz(1,252,150,32,'Обірваний дріт'),'Обірваний дріт може вдарити струмом. Тримайся далеко й клич дорослих.'],
+ [hz(1,254,158,32,'Обірваний дріт'),'Обірваний дріт може вдарити струмом. Тримайся далеко й клич дорослих.'],
  [hz(2,120,206,30,'Відкритий люк'),'Відкритий люк обходь стороною, не зазирай усередину.']],
 svg:function(){return ''+
 '<defs><linearGradient id="x-gk-sky3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78A9C0"/><stop offset="1" stop-color="#C7DFE0"/></linearGradient></defs>'+
@@ -398,7 +398,6 @@ scissors:'<svg viewBox="0 0 48 48"><circle cx="13" cy="35" r="6" fill="none" str
 candy:'<svg viewBox="0 0 48 48"><path d="M10 24l-7-8v16zM38 24l7-8v16z" fill="#F29CB8"/><ellipse cx="24" cy="24" rx="15" ry="11" fill="#E0614A"/><path d="M14 18q6 12 0 12M24 13q6 11 0 22M33 16q5 8 0 16" stroke="#F7D774" stroke-width="2.6" fill="none"/></svg>',
 teddy:'<svg viewBox="0 0 48 48"><circle cx="13" cy="10" r="5" fill="#B9844C"/><circle cx="35" cy="10" r="5" fill="#B9844C"/><circle cx="24" cy="31" r="13" fill="#B9844C"/><circle cx="24" cy="16" r="10" fill="#C99460"/><circle cx="20" cy="14" r="1.5" fill="#222"/><circle cx="28" cy="14" r="1.5" fill="#222"/><ellipse cx="24" cy="19" rx="4" ry="3" fill="#E8C9A0"/><circle cx="24" cy="18" r="1.2" fill="#222"/><ellipse cx="24" cy="33" rx="6" ry="7" fill="#E8C9A0"/></svg>',
 ball:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="#7FB2CF"/><path d="M7 24h34M24 7q10 17 0 34M24 7q-10 17 0 34" stroke="#F4F1E8" stroke-width="3" fill="none"/><path d="M14 13q4-4 9-5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".6"/></svg>',
-markers:'<svg viewBox="0 0 48 48"><g transform="rotate(-20 24 24)"><rect x="10" y="10" width="7" height="28" rx="2" fill="#E0614A"/><rect x="20" y="10" width="7" height="28" rx="2" fill="#F2C230"/><rect x="30" y="10" width="7" height="28" rx="2" fill="#7BC47F"/><path d="M10 38l3.5 6 3.5-6M20 38l3.5 6 3.5-6M30 38l3.5 6 3.5-6" fill="#3B3D3A"/></g></svg>'
 };
 var KIT=[
 ['bandage','Бинт',1,'Бинт — щоб перев\'язати рану.'],
@@ -409,8 +408,7 @@ var KIT=[
 ['scissors','Ножиці',1,'Ножиці з круглими кінчиками — розрізати бинт.'],
 ['candy','Цукерки',0,'Цукерки смачні, але не лікують. Їм не місце в аптечці.'],
 ['teddy','Іграшка',0,'Іграшку краще взяти в наплічник, а не в аптечку.'],
-['ball','М\'яч',0,'М\'яч — для гри, в аптечці він зайвий.'],
-['markers','Фломастери',0,'Фломастери не допоможуть при ранці.']];
+['ball','М\'яч',0,'М\'яч — для гри, в аптечці він зайвий.']];
 var KITSVG='<svg class="x-gk-kit" id="x-gk-kit" viewBox="0 0 120 96" aria-hidden="true"><ellipse cx="60" cy="90" rx="46" ry="5" fill="rgba(0,0,0,.45)"/><rect x="44" y="10" width="32" height="14" rx="6" fill="none" stroke="#3F6B44" stroke-width="6"/>'+
 '<rect x="10" y="30" width="100" height="56" rx="10" fill="#3E9B5A"/><rect x="10" y="70" width="100" height="16" rx="8" fill="#2F7D47" opacity=".8"/>'+
 '<g class="x-gk-lid"><rect x="8" y="22" width="104" height="16" rx="7" fill="#4FB06A"/><rect x="52" y="26" width="16" height="8" rx="2" fill="#2F7D47"/></g>'+
@@ -422,8 +420,8 @@ var slots='';for(var s=0;s<need;s++)slots+='<i></i>';
 box.innerHTML='<div class="view stack" id="x-gk-ak">'+A.gHead('Збери аптечку','Перетягни в аптечку все, що допомагає при ранці чи холоді. Зайве — залиш. Можна просто торкнутися.')+
 '<div class="x-gk-hud"><span id="x-gk-got" role="status">0 / '+need+'</span><span id="x-gk-tm">'+total+' с</span></div><div class="bar" aria-hidden="true"><i id="x-gk-tb" style="width:100%;transition:width .2s linear"></i></div>'+
 '<div class="x-gk-kitw" id="x-gk-kw">'+KITSVG+'<div class="stack" style="gap:6px"><b>Аптечка</b><div class="x-gk-slots" id="x-gk-sl" aria-hidden="true">'+slots+'</div></div></div>'+
-'<div class="x-gk-items">'+items.map(function(p,i){return '<button class="x-gk-it" data-i="'+i+'" aria-label="'+p[1]+'" style="animation-delay:'+(i*.04)+'s">'+IC[p[0]]+'<span>'+p[1]+'</span></button>';}).join('')+'</div>'+
-'<div class="x-gk-tip" id="x-gk-tip" role="status" aria-live="polite">Що покладемо першим?</div></div>';
+'<div class="x-gk-tip" id="x-gk-tip" role="status" aria-live="polite">Що покладемо першим?</div>'+
+'<div class="x-gk-items">'+items.map(function(p,i){return '<button class="x-gk-it" data-i="'+i+'" aria-label="'+p[1]+'" style="animation-delay:'+(i*.04)+'s">'+IC[p[0]]+'<span>'+p[1]+'</span></button>';}).join('')+'</div></div>';
 root=q('#x-gk-ak',box);kw=q('#x-gk-kw',root);tip=q('#x-gk-tip',root);
 function say(t,k){tip.className='x-gk-tip'+(k?' '+k:'');void tip.offsetWidth;tip.textContent=t;}
 function kitC(){var r=kw.querySelector('.x-gk-kit').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height*.55];}
@@ -461,9 +459,11 @@ function play(k){n=k;placed=0;mist=0;sel=null;var order=A.shuffle(range(n*n));
 box.innerHTML='<div class="view stack" id="x-gk-pz">'+A.gHead('Пазл «Артан»','Тьмяна емблема на полі підкаже, куди класти частинки.')+
 '<div class="x-gk-hud"><span class="x-gk-pill" id="x-gk-pp" role="status">0 / '+(n*n)+'</span><button class="ghost x-gk-snd x-gk-peek" data-x="peek" aria-label="Підглянути картинку (утримуй)">Підглянути</button></div>'+
 '<div class="x-gk-board" id="x-gk-bd" style="grid-template-columns:repeat('+n+',1fr)">'+range(n*n).map(function(i){return '<div class="x-gk-slot" data-s="'+i+'" role="button" tabindex="0" aria-label="Клітинка '+(i+1)+'"></div>';}).join('')+'</div>'+
-'<div class="x-gk-tip" id="x-gk-tip" role="status" aria-live="polite">Почни з кутів — у них видно край кола</div>'+
-'<div class="x-gk-tray" id="x-gk-tr">'+order.map(function(i,j){var sz=n===3?84:64;return '<button class="x-gk-pc" data-p="'+i+'" aria-label="Частинка '+(i+1)+'" style="width:'+sz+'px;height:'+sz+'px;animation-delay:'+(j*.03)+'s;'+pcBg(i,n)+'"></button>';}).join('')+'</div></div>';
+'<div class="x-gk-tray" id="x-gk-tr">'+order.map(function(i,j){var sz=n===3?72:58;return '<button class="x-gk-pc" data-p="'+i+'" aria-label="Частинка '+(i+1)+'" style="width:'+sz+'px;height:'+sz+'px;animation-delay:'+(j*.03)+'s;'+pcBg(i,n)+'"></button>';}).join('')+'</div>'+
+'<div class="x-gk-tip" id="x-gk-tip" role="status" aria-live="polite">Почни з кутів — у них видно край кола</div></div>';
 root=q('#x-gk-pz',box);board=q('#x-gk-bd',root);tray=q('#x-gk-tr',root);tip=q('#x-gk-tip',root);
+/* bring board + tray into view so dragging never needs scrolling */
+A.later(function(){var h=q('.x-gk-hud',root);if(h&&window.innerHeight<900){var y=h.getBoundingClientRect().top+(window.pageYOffset||0)-12;try{window.scrollTo({top:y,behavior:'smooth'});}catch(e){window.scrollTo(0,y);}}},450);
 Array.prototype.forEach.call(tray.querySelectorAll('.x-gk-pc'),function(el){
 dr.bind(el,{can:function(){return !over&&el.parentNode===tray;},
 start:function(){unsel();},
