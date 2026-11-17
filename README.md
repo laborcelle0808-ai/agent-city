@@ -92,7 +92,7 @@
 | `usability-tester` | Понятность для людей, путь до цели |
 | `game-tester` | Игры, Mini Apps, интерактив, FPS |
 
-## 🧰 Скиллы (34)
+## 🧰 Скиллы (35)
 **SMM:** `smm-strategy`, `content-plan`, `post-writing`, `hashtag-research`, `video-script`, `ad-campaign`, `analytics-report`
 **Дизайн:** `brand-guidelines`, `social-graphics`, `design-system`, `ux-audit`
 **Арт и анимация:** `art-direction`, `animation-craft`, `svg-illustration`, `3d-web`, `video-editing`, `ai-image-prompts`
@@ -100,6 +100,7 @@
 **Безопасность:** `pentest-methodology`, `vuln-report`, `security-hardening`
 **Тестирование:** `test-strategy`, `e2e-playwright`, `api-testing`, `performance-testing`, `accessibility-testing`
 **Общие:** `launch-checklist`
+**Артефакты (официальный, [anthropics/skills](https://github.com/anthropics/skills)):** `web-artifacts-builder` — сложные артефакты на React + TypeScript + Tailwind + shadcn/ui, сборка в один HTML.
 **UI/UX (сторонний, [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), MIT):** `ui-ux-pro-max` — стили, палитры, шрифтовые пары, 120 UX-правил, поиск по локальной базе.
 **Стиль ответов (сторонние, [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman), MIT):** `caveman` — коротко, без воды · `ultracave` — максимальное сжатие · `megacave` — классический китайский. Включение: `/caveman`, выключение: `stop caveman`.
 
