@@ -1,0 +1,418 @@
+<title>Город Агентов</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: isometric night-city map as the hero, sticky info panel beside it, resident directory below. Single deliberate night look. */
+:root{
+  color-scheme:dark;
+  --night:#0f1226; --panel:#161a34; --ground:#1a1f3d; --road:#232950; --line:#313968;
+  --ink:#eceaff; --muted:#a2a7cf; --glow:#ffd88a;
+  --f-display:"Unbounded",system-ui,sans-serif;
+  --f-body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+html,body{background:var(--night);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1400px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+header{display:grid;gap:14px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,5.4vw,58px);line-height:1.02;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 span{color:var(--glow)}
+.lede{max-width:64ch;color:var(--muted);margin:0;font-size:16px}
+.stats{display:flex;flex-wrap:wrap;gap:10px 26px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.stats b{font-family:var(--f-display);font-weight:500;font-size:22px;color:var(--ink);margin-right:6px;font-variant-numeric:tabular-nums}
+.stats a{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 13px var(--f-body);color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--muted))}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--night);border-color:var(--ink)}
+.chip:focus-visible,.res:focus-visible,.copy:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:start}
+@media (max-width:960px){.stage{grid-template-columns:minmax(0,1fr)}}
+.map{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  background:
+   radial-gradient(1px 1px at 12% 18%,#fff8 50%,transparent 51%),
+   radial-gradient(1px 1px at 78% 9%,#fff6 50%,transparent 51%),
+   radial-gradient(1.5px 1.5px at 46% 6%,#fff7 50%,transparent 51%),
+   radial-gradient(1px 1px at 90% 30%,#fff5 50%,transparent 51%),
+   radial-gradient(1px 1px at 6% 52%,#fff5 50%,transparent 51%),
+   radial-gradient(120% 70% at 50% 0%,#232a5c 0%,var(--night) 70%)}
+.map svg{display:block;width:100%;height:auto;max-width:100%}
+.hint{position:absolute;left:14px;bottom:12px;font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;pointer-events:none}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--night);padding:7px 11px;border-radius:10px;font-size:13px;line-height:1.3;max-width:240px;box-shadow:0 8px 24px #0008}
+.tip b{display:block;font-family:var(--f-mono);font-weight:500;font-size:12px}
+
+.bld{cursor:pointer;transition:transform .18s ease,opacity .2s}
+.bld:hover,.bld:focus-visible{transform:translateY(-6px);outline:none}
+.bld:hover .roof,.bld:focus-visible .roof{filter:brightness(1.35)}
+.bld .ring{opacity:0}
+.bld.sel .ring{opacity:1;animation:pulse 1.6s ease-in-out infinite}
+.bld.sel .roof{stroke:#fff;stroke-width:2}
+.bld.dim{opacity:.22}
+.sign{cursor:pointer}
+.sign text{font-family:var(--f-display);font-weight:500;font-size:13px;fill:var(--night)}
+.sign .cnt{font-family:var(--f-mono);font-size:11px}
+.beacon{animation:blink 1.8s ease-in-out infinite}
+.flick{animation:flick 5s steps(1) infinite}
+@keyframes pulse{50%{stroke-opacity:.25}}
+@keyframes blink{50%{opacity:.25}}
+@keyframes flick{0%,70%{opacity:1}72%{opacity:.2}76%{opacity:1}88%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.bld,.bld .ring,.beacon,.flick{animation:none;transition:none}}
+
+.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:14px;min-width:0}
+.panel h2{font-family:var(--f-display);font-weight:500;font-size:22px;line-height:1.15;margin:0;text-wrap:balance}
+.panel p{margin:0;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tag i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.code{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.code code{font-family:var(--f-mono);font-size:13.5px;background:var(--road);padding:4px 9px;border-radius:7px;color:var(--ink)}
+.call{background:var(--night);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.call small{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.call q{quotes:"«" "»";color:var(--ink);font-size:15px}
+.copy{justify-self:start;font:500 13px var(--f-body);background:var(--glow);color:var(--night);border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.chain span{background:var(--road);color:var(--ink);padding:3px 8px;border-radius:6px}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;align-items:baseline;color:var(--ink)}
+.steps li::before{content:counter(s);font-family:var(--f-mono);font-size:12px;color:var(--glow)}
+.reslist{display:flex;flex-wrap:wrap;gap:6px}
+.skillgroup{display:grid;gap:6px}
+.skillgroup h3{margin:0;font:600 13px var(--f-body);color:var(--ink)}
+.skillgroup div{display:flex;flex-wrap:wrap;gap:5px}
+.skillgroup code{font-family:var(--f-mono);font-size:12px;background:var(--road);padding:2px 7px;border-radius:6px}
+
+.dir{display:grid;gap:22px}
+.dir > h2{font-family:var(--f-display);font-weight:500;font-size:24px;margin:0}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+.dblock{display:grid;gap:10px;align-content:start;min-width:0}
+.dblock h3{margin:0;display:flex;align-items:center;gap:10px;font:600 15px var(--f-body)}
+.dblock h3 i{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.dblock h3 small{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-size:12px}
+.res{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;text-align:left;width:100%;background:transparent;border:0;border-top:1px solid var(--line);padding:8px 2px;color:var(--ink);cursor:pointer;font:inherit}
+.res:hover{background:#ffffff08}
+.res i{grid-row:span 2;width:4px;border-radius:2px;background:var(--c);align-self:stretch}
+.res b{font-weight:500;font-size:14.5px}
+.res span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.res.on{background:#ffffff10}
+.panel .res{border:1px solid var(--line);border-radius:8px;padding:5px 9px;width:auto;display:inline-flex;gap:6px;align-items:center}
+footer{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+footer a{color:var(--ink)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Claude Code · субагенты и скиллы</div>
+    <h1>Город <span>Агентов</span></h1>
+    <p class="lede">54 жителя в шести районах, мэрия в центре и библиотека из 30 скиллов. Нажмите на здание, чтобы узнать, кто в нём работает и как его позвать. По дорогам ездят курьеры: они разносят задачи от мэра по районам.</p>
+    <div class="stats">
+      <div><b>54</b>агента</div><div><b>6</b>районов</div><div><b>30</b>скиллов</div><div><b>1</b>мэр</div>
+      <div style="align-self:center">репозиторий: <a href="https://github.com/laborcelle0808-ai/agent-city" target="_blank" rel="noopener">agent-city</a></div>
+    </div>
+  </header>
+
+  <div class="chips" id="chips" role="group" aria-label="Подсветить район"></div>
+
+  <div class="stage">
+    <div class="map" id="map">
+      <svg id="city" role="img" aria-label="Изометрическая карта Города Агентов"></svg>
+      <div class="tip" id="tip" hidden></div>
+      <div class="hint">нажмите на здание или вывеску района</div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section class="dir">
+    <h2>Жители города</h2>
+    <div class="dgrid" id="dir"></div>
+  </section>
+
+  <footer>Все агенты лежат в папке <code>.claude/agents</code>, скиллы — в <code>.claude/skills</code> репозитория <a href="https://github.com/laborcelle0808-ai/agent-city" target="_blank" rel="noopener">agent-city</a>.</footer>
+</div>
+
+<script>
+const D={
+  mayor:{name:'Мэрия',color:'#f3e3b3',slot:[1,1],desc:'Мэр принимает большую задачу, раскладывает её по районам и собирает готовый результат.'},
+  smm:{name:'SMM-квартал',color:'#ff8099',slot:[0,0],desc:'Стратегия, тексты, площадки, реклама и аналитика соцсетей.'},
+  art:{name:'Арт-квартал',color:'#f6d06a',slot:[0,1],desc:'Сильные дизайнеры и аниматоры: арт-дирекшн, 3D, шейдеры, анимация персонажей, видео.'},
+  design:{name:'Квартал дизайна',color:'#b59dff',slot:[0,2],desc:'Интерфейсы, фирменный стиль, графика для соцсетей, моушн и презентации.'},
+  qa:{name:'Испытательный полигон',color:'#ff9d5c',slot:[1,0],desc:'Тестировщики: от ручных проверок до нагрузки, доступности и игр. Вердикт перед запуском.'},
+  lib:{name:'Библиотека скиллов',color:'#e7a6ff',slot:[1,2],desc:'30 скиллов — готовые методички, которые агенты загружают перед работой.'},
+  cyber:{name:'Кибер-квартал',color:'#5fe0b0',slot:[2,0],desc:'Этичные хакеры. Проверяют только ваши системы или системы, на которые есть письменное разрешение владельца.'},
+  tech:{name:'Технопарк',color:'#5cc6ff',slot:[2,1],desc:'Разработка сайтов, программ, ботов, приложений, баз данных и деплой.'},
+  park:{name:'Центральный парк',color:'#7bd88f',slot:[2,2]}
+};
+const A=[
+ ['city-mayor','Мэр','mayor','Оркестратор: разбивает большую задачу на части и раздаёт её районам, потом собирает итог.','Запусти бренд кофейни под ключ: стратегия, логотип, лендинг и контент-план'],
+ ['smm-strategist','SMM-стратег','smm','Стратегия, анализ аудитории и конкурентов, позиционирование, KPI и контент-воронка.','Составь SMM-стратегию для кофейни на 3 месяца'],
+ ['copywriter','Копирайтер','smm','Тексты постов, сторис, рекламы, лендингов и рассылок на русском, украинском и английском.','Напиши 5 постов для Instagram про запуск нового меню'],
+ ['instagram-expert','Эксперт Instagram','smm','Шапка профиля, Reels, карусели, сторис, хештеги и рост аккаунта.','Перепиши шапку профиля и предложи 10 идей для Reels'],
+ ['tiktok-reels-expert','Эксперт коротких видео','smm','Сценарии для TikTok, Reels и Shorts: хуки, тренды, раскадровки.','Сценарий вирусного ролика на 20 секунд'],
+ ['telegram-expert','Эксперт Telegram','smm','Каналы, посевы, рост подписчиков и закупка рекламы.','План роста канала до 5000 подписчиков'],
+ ['youtube-expert','Эксперт YouTube','smm','Идеи и сценарии роликов, названия для поиска, превью, удержание.','10 названий и ТЗ на превью для ролика'],
+ ['linkedin-facebook-expert','Эксперт LinkedIn и Facebook','smm','B2B-контент, личный бренд, страницы и группы.','Экспертный пост для LinkedIn о кейсе клиента'],
+ ['community-manager','Комьюнити-менеджер','smm','Ответы в комментариях и директ, работа с негативом, конкурсы.','Шаблоны ответов на 10 частых вопросов'],
+ ['ads-targetologist','Таргетолог','smm','Реклама в Meta, TikTok, Telegram и Google: аудитории, бюджеты, тесты.','Медиаплан рекламы на $500 в Instagram'],
+ ['social-analyst','Аналитик соцсетей','smm','Метрики, отчёты, ER, CPL, ROMI и рекомендации.','Проанализируй выгрузку статистики за месяц'],
+ ['art-director','Арт-директор','art','Главный дизайнер города: концепции, мудборды и проверка качества всех работ.','Предложи 3 визуальных направления для бренда'],
+ ['creative-web-designer','Креативный веб-дизайнер','art','Сайты уровня Awwwards: смелая типографика и эффекты при прокрутке.','Премиальный лендинг с анимациями при прокрутке'],
+ ['illustrator','Иллюстратор','art','SVG-иллюстрации, персонажи, маскоты, иконки и паттерны.','Нарисуй маскота бренда в 5 эмоциях'],
+ ['3d-designer','3D-дизайнер','art','3D-сцены на сайтах (Three.js, Spline) и рендеры в Blender.','3D-сцена с продуктом для первого экрана'],
+ ['character-animator','Аниматор персонажей','art','Анимация персонажей, Lottie, Rive и стикеры для Telegram.','Оживи маскота: анимация ожидания и набор стикеров'],
+ ['webgl-motion-artist','WebGL-художник','art','Шейдеры, частицы и генеративные эффекты на сайтах.','Интерактивный «жидкий» фон для первого экрана'],
+ ['video-editor','Видеомонтажёр','art','Монтаж, субтитры, форматы под соцсети, видео из кода.','Смонтируй Reels с субтитрами из 3 клипов'],
+ ['ai-visual-artist','AI-визуальщик','art','Промпты для Midjourney, Flux, Runway, Veo и других генераторов.','5 промптов для фото продукта в едином стиле'],
+ ['ui-ux-designer','UI/UX-дизайнер','design','Прототипы, пользовательские сценарии, дизайн-системы, UX-аудит.','Прототип личного кабинета в HTML'],
+ ['brand-designer','Бренд-дизайнер','design','Логотипы, фирменный стиль, брендбук, нейминг и палитры.','3 концепции логотипа в SVG для студии йоги'],
+ ['social-graphic-designer','Дизайнер для соцсетей','design','Посты, карусели, сторис, баннеры и превью в PNG.','Карусель из 7 слайдов по нашему брендбуку'],
+ ['motion-designer','Моушн-дизайнер','design','Анимации интерфейса, анимированные баннеры и GIF.','Анимированный баннер для сторис'],
+ ['presentation-designer','Дизайнер презентаций','design','Питч-деки, коммерческие предложения, медиакиты.','Питч-дек на 10 слайдов для инвесторов'],
+ ['qa-lead','Руководитель тестирования','qa','Стратегия тестирования и вердикт «можно запускать или нет».','Протестируй лендинг и скажи, можно ли запускать'],
+ ['qa-tester','Тестировщик','qa','Ручное тестирование, чек-листы и баг-репорты.','Пройди все формы сайта и опиши баги'],
+ ['e2e-automation-engineer','Инженер автотестов','qa','Автотесты Playwright: сценарии пользователя, формы, оплата.','Автотест на оформление заказа'],
+ ['api-tester','Тестировщик API','qa','Позитивные и негативные проверки, схемы ответов, контракты.','Тесты для всех методов API'],
+ ['performance-tester','Тестировщик скорости','qa','Нагрузка k6 и Locust, скорость сайта в Lighthouse.','Выдержит ли сайт 500 посетителей одновременно'],
+ ['accessibility-tester','Тестировщик доступности','qa','Проверка по WCAG 2.2: клавиатура, контраст, экранные чтецы.','Проверь доступность главной страницы'],
+ ['visual-regression-tester','Тестировщик вёрстки','qa','Скриншот-тесты на всех экранах и сверка с макетом.','Сравни вёрстку на телефоне и на компьютере'],
+ ['usability-tester','Юзабилити-тестировщик','qa','Понятен ли сайт людям: путь до цели и тест пяти секунд.','Пройди путь покупателя от лица трёх клиентов'],
+ ['game-tester','Тестировщик игр','qa','Браузерные игры, Telegram Mini Apps, интерактив и FPS.','Протестируй игру в Telegram Mini App'],
+ ['pentest-lead','Руководитель пентеста','cyber','Планирует проверку безопасности ваших систем и собирает отчёт.','Проверь безопасность моего сайта'],
+ ['web-pentester','Веб-пентестер','cyber','Ищет XSS, SQL-инъекции, обход авторизации в ваших приложениях.','Найди уязвимости в форме входа на моём сайте'],
+ ['api-hacker','Хакер API','cyber','Безопасность REST и GraphQL API, вебхуков и ботов.','Проверь, не видны ли чужие заказы через моё API'],
+ ['recon-analyst','Разведчик','cyber','Что о вашем проекте видно снаружи: поддомены, утечки ключей, забытые сервисы.','Найди мои забытые поддомены и открытые сервисы'],
+ ['cloud-security-hacker','Защитник облака','cyber','Серверы, Docker, облака и безопасный CI/CD.','Аудит моего сервера и Docker-образа'],
+ ['mobile-security-tester','Мобильная безопасность','cyber','Проверка ваших iOS и Android приложений по OWASP MASVS.','Проверь мой APK на зашитые ключи'],
+ ['bug-bounty-hunter','Багхантер','cyber','Ищет баги строго по правилам официальных bug bounty программ.','Разбери правила программы и составь план'],
+ ['incident-responder','Спасатель при взломе','cyber','Помогает, если взломали сайт, соцсеть или бота.','Угнали Instagram — что делать по шагам'],
+ ['web-architect','Архитектор','tech','Выбор стека, архитектура, структура проекта и ТЗ.','Выбери стек и составь ТЗ для онлайн-школы'],
+ ['frontend-dev','Frontend-разработчик','tech','React, Next.js, Vue, TypeScript, Tailwind, адаптив.','Сверстай каталог товаров на Next.js'],
+ ['backend-dev','Backend-разработчик','tech','API, авторизация, платежи и интеграции.','API с авторизацией и оплатой'],
+ ['fullstack-site-builder','Сборщик сайтов','tech','Лендинги и сайты под ключ: от макета до публикации.','Лендинг для барбершопа с формой записи'],
+ ['mobile-dev','Мобильный разработчик','tech','iOS и Android на React Native, Flutter, Swift, Kotlin.','Приложение-трекер привычек на Expo'],
+ ['desktop-python-dev','Разработчик программ','tech','Программы для компьютера, утилиты, парсеры, обработка файлов.','Программа для пакетного сжатия фото'],
+ ['bot-developer','Разработчик ботов','tech','Telegram, WhatsApp и AI-боты, воронки, мини-аппы.','Telegram-бот для записи клиентов'],
+ ['automation-engineer','Инженер автоматизации','tech','n8n, Make, API соцсетей, автопостинг, CRM.','Заявки с сайта — в таблицу и уведомление в Telegram'],
+ ['database-engineer','Инженер баз данных','tech','Схемы БД, SQL, миграции, Supabase и Firebase.','Спроектируй базу для интернет-магазина'],
+ ['devops-engineer','DevOps-инженер','tech','Docker, CI/CD, серверы, домены, SSL и публикация.','Настрой автопубликацию сайта через GitHub Actions'],
+ ['code-reviewer','Код-ревьюер','tech','Проверка кода на баги, читаемость и скорость.','Проверь код бота перед запуском'],
+ ['security-auditor','Аудитор безопасности','tech','Проверка кода по OWASP Top 10 и поиск утечек ключей.','Проверь проект на утечки ключей'],
+ ['seo-specialist','SEO-специалист','tech','SEO-аудит, семантика, мета-теги, schema.org.','SEO-аудит лендинга и список правок']
+];
+const SK=[
+ ['SMM',['smm-strategy','content-plan','post-writing','hashtag-research','video-script','ad-campaign','analytics-report']],
+ ['Дизайн',['brand-guidelines','social-graphics','design-system','ux-audit']],
+ ['Арт и анимация',['art-direction','animation-craft','svg-illustration','3d-web','video-editing','ai-image-prompts']],
+ ['Разработка',['landing-page','telegram-bot','seo-audit','code-review-checklist']],
+ ['Безопасность',['pentest-methodology','vuln-report','security-hardening']],
+ ['Тестирование',['test-strategy','e2e-playwright','api-testing','performance-testing','accessibility-testing']],
+ ['Общие',['launch-checklist']]
+];
+const PIPE=['Стратегия','Арт-концепция','Бренд и дизайн','Разработка','Анимации','Тестирование','Проверка безопасности','Контент','Запуск','Аналитика'];
+const byId=Object.fromEntries(A.map(a=>[a[0],a]));
+const leads={};A.forEach(a=>{if(!leads[a[2]])leads[a[2]]=a[0]});
+const DORDER=['smm','art','design','tech','cyber','qa'];
+
+/* ---------- geometry ---------- */
+const TW=64,TH=32,N=19,PADX=40,TOP=150,BOT=30,NIGHT='#0f1226';
+const OX=N*TW/2+PADX,OY=TOP,W=N*TW+2*PADX,H=N*TH+TOP+BOT;
+const iso=(x,y,z=0)=>[(x-y)*TW/2+OX,(x+y)*TH/2+OY-z];
+const pt=p=>p[0].toFixed(1)+','+p[1].toFixed(1);
+const poly=(ps,at)=>`<polygon points="${ps.map(pt).join(' ')}" ${at}/>`;
+const rgb=h=>{const n=parseInt(h.slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+const mix=(a,b,t)=>{const x=rgb(a),y=rgb(b);return'rgb('+x.map((v,i)=>Math.round(v+(y[i]-v)*t)).join(',')+')'};
+const hash=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const rng=seed=>()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const plotOrigin=k=>{const[r,c]=D[k].slot;return[1+6*c,1+6*r]};
+
+function face(P,Q,h,r){
+  const rows=Math.max(1,Math.floor((h-12)/11));let s='';
+  const L=(u,v)=>[P[0]+(Q[0]-P[0])*u,P[1]+(Q[1]-P[1])*u-v];
+  for(let i=0;i<rows;i++){const v1=8+i*11,v2=v1+5;
+    for(let j=0;j<3;j++){const u1=.14+j*.27,u2=u1+.15,lit=r()<.56;
+      s+=poly([L(u1,v1),L(u2,v1),L(u2,v2),L(u1,v2)],lit?`fill="#ffd88a" fill-opacity="${(.5+r()*.5).toFixed(2)}"${r()<.06?' class="flick"':''}`:'fill="#272c52"');}}
+  return s;
+}
+function box(x0,y0,x1,y1,z,h,col,r,o={}){
+  const a=iso(x0,y0,z),b=iso(x1,y0,z),c=iso(x1,y1,z),d=iso(x0,y1,z),up=p=>[p[0],p[1]-h];
+  let s=poly([d,c,up(c),up(d)],`fill="${mix(col,NIGHT,.72)}"`)+poly([c,b,up(b),up(c)],`fill="${mix(col,NIGHT,.6)}"`);
+  if(o.windows!==false){s+=face(d,c,h,r)+face(c,b,h,r)}
+  s+=poly([up(a),up(b),up(c),up(d)],`class="roof" fill="${o.roof||mix(col,NIGHT,.1)}"`);
+  s+=`<polyline points="${[up(d),up(c),up(b)].map(pt).join(' ')}" fill="none" stroke="${col}" stroke-opacity=".6"/>`;
+  return s;
+}
+function antenna(cx,cy,z,col,len=20){
+  const p=iso(cx,cy,z);
+  return `<line x1="${p[0]}" y1="${p[1]}" x2="${p[0]}" y2="${p[1]-len}" stroke="${mix(col,NIGHT,.3)}" stroke-width="2"/><circle class="beacon" cx="${p[0]}" cy="${p[1]-len}" r="3.4" fill="${col}" filter="url(#glow)"/>`;
+}
+function ring(x,y,col){return poly([iso(x,y),iso(x+1,y),iso(x+1,y+1),iso(x,y+1)],`class="ring" fill="${col}" fill-opacity=".18" stroke="${col}" stroke-width="2"`)}
+
+const POS=[[2,2],[0,0],[4,4],[0,4],[4,0],[2,0],[0,2],[4,2],[2,4],[1,1],[3,3],[1,3],[3,1]];
+const items=[];
+
+// agents
+DORDER.forEach(k=>{
+  const[ox,oy]=plotOrigin(k),col=D[k].color;
+  A.filter(a=>a[2]===k).forEach((a,i)=>{
+    const[px,py]=POS[i],x=ox+px,y=oy+py,r=rng(hash(a[0])),lead=i===0;
+    const h=lead?118:42+Math.floor(r()*50),s=.14;
+    let g=ring(x,y,col)+box(x+s,y+s,x+1-s,y+1-s,0,h,col,r);
+    if(lead)g+=antenna(x+.5,y+.5,h,col,22);
+    else if(r()<.35){g+=antenna(x+.5,y+.5,h,col,10)}
+    items.push({d:x+y,svg:`<g class="bld" data-id="${a[0]}" data-d="${k}" tabindex="0" role="button" aria-label="${a[1]}">${g}</g>`});
+  });
+});
+// mayor hall
+{const col=D.mayor.color,r=rng(7);
+  let g=ring(9,9,col);
+  g+=box(7.5,7.5,11.5,11.5,0,24,col,r,{roof:mix(col,NIGHT,.35)});
+  g+=box(8.3,8.3,10.7,10.7,24,44,col,r);
+  g+=box(9.05,9.05,9.95,9.95,68,86,col,r);
+  g+=antenna(9.5,9.5,154,'#ffd88a',26);
+  items.push({d:19,svg:`<g class="bld" data-id="city-mayor" data-d="mayor" tabindex="0" role="button" aria-label="Мэрия">${g}</g>`});}
+// library
+{const col=D.lib.color,r=rng(11),[ox,oy]=plotOrigin('lib');
+  let g=box(ox+.5,oy+1,ox+4.5,oy+4,0,38,col,r);
+  g+=box(ox+1.2,oy+1.6,ox+3.8,oy+3.4,38,18,col,r,{windows:false,roof:col});
+  items.push({d:ox+oy+5,svg:`<g class="bld" data-id="library" data-d="lib" tabindex="0" role="button" aria-label="Библиотека скиллов">${g}</g>`});}
+// park
+{const[ox,oy]=plotOrigin('park'),r=rng(3);
+  const f=iso(ox+2.5,oy+2.5);
+  items.push({d:ox+oy+5,svg:`<ellipse cx="${f[0]}" cy="${f[1]}" rx="40" ry="20" fill="#2c5f7a" stroke="#7fd3ff" stroke-opacity=".5"/><ellipse cx="${f[0]}" cy="${f[1]}" rx="14" ry="7" fill="#7fd3ff" fill-opacity=".5"/>`});
+  [[0.5,0.6],[1.5,0.3],[3.4,0.5],[4.4,1.4],[0.4,2],[4.5,3],[0.6,3.6],[1.6,4.5],[3.3,4.4],[4.3,4.4],[2.5,0.6],[0.5,4.6]].forEach(([tx,ty])=>{
+    const p=iso(ox+tx,oy+ty),s=.8+r()*.5;
+    items.push({d:ox+tx+oy+ty,svg:`<line x1="${p[0]}" y1="${p[1]}" x2="${p[0]}" y2="${p[1]-10*s}" stroke="#4b3a2a" stroke-width="3"/><circle cx="${p[0]}" cy="${p[1]-18*s}" r="${11*s}" fill="${mix('#7bd88f',NIGHT,.35+r()*.2)}"/><circle cx="${p[0]-3*s}" cy="${p[1]-21*s}" r="${5*s}" fill="#7bd88f" fill-opacity=".35"/>`});
+  });}
+items.sort((a,b)=>a.d-b.d);
+
+// ground
+let ground=poly([iso(0,0),iso(N,0),iso(N,N),iso(0,N)],'fill="#202650"');
+Object.keys(D).forEach(k=>{const[ox,oy]=plotOrigin(k),c=D[k].color;
+  ground+=poly([iso(ox,oy),iso(ox+5,oy),iso(ox+5,oy+5),iso(ox,oy+5)],`fill="${mix(c,'#1a1f3d',.84)}" stroke="${c}" stroke-opacity=".35"`);});
+const ROUTES=[[[6.5,6.5],[12.5,6.5],[12.5,12.5],[6.5,12.5],[6.5,6.5]],[[.5,.5],[18.5,.5],[18.5,18.5],[.5,18.5],[.5,.5]],[[6.5,.5],[6.5,18.5]],[[12.5,.5],[12.5,18.5]],[[.5,6.5],[18.5,6.5]],[[.5,12.5],[18.5,12.5]]];
+ROUTES.forEach(rt=>{ground+=`<polyline points="${rt.map(p=>pt(iso(p[0],p[1]))).join(' ')}" fill="none" stroke="#3b4488" stroke-width="1.5" stroke-dasharray="6 9"/>`});
+
+// signs
+let signs='';
+['mayor',...DORDER,'lib'].forEach(k=>{
+  const[ox,oy]=plotOrigin(k),p=iso(ox+2.5,oy+2.5),lift=k==='mayor'?205:k==='lib'?95:158;
+  const n=k==='mayor'?'':k==='lib'?'30 скиллов':A.filter(a=>a[2]===k).length+' агентов';
+  signs+=`<g class="sign" data-sign="${k}" transform="translate(${p[0].toFixed(1)},${(p[1]-lift).toFixed(1)})"><rect rx="11" fill="${D[k].color}"/><text text-anchor="middle" y="4">${D[k].name}${n?` <tspan class="cnt" dx="4">${n}</tspan>`:''}</text></g>`;
+});
+
+const svg=document.getElementById('city');
+svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+svg.innerHTML=`<defs><filter id="glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<g>${ground}</g><g id="couriers"></g><g>${items.map(i=>i.svg).join('')}</g><g>${signs}</g>`;
+function sizeSigns(){svg.querySelectorAll('.sign').forEach(g=>{const t=g.querySelector('text').getBBox(),r=g.querySelector('rect');
+  r.setAttribute('x',t.x-12);r.setAttribute('y',t.y-6);r.setAttribute('width',t.width+24);r.setAttribute('height',t.height+12);});}
+sizeSigns();if(document.fonts){document.fonts.ready.then(sizeSigns);document.fonts.addEventListener?.('loadingdone',sizeSigns)}
+
+/* ---------- couriers ---------- */
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const routes=ROUTES.map(rt=>{const seg=[];let L=0;for(let i=1;i<rt.length;i++){const l=Math.hypot(rt[i][0]-rt[i-1][0],rt[i][1]-rt[i-1][1]);seg.push([rt[i-1],rt[i],L,l]);L+=l}
+  return{seg,L,closed:rt[0][0]===rt.at(-1)[0]&&rt[0][1]===rt.at(-1)[1]}});
+const cols=DORDER.map(k=>D[k].color).concat(['#ffd88a']);
+const cr=rng(42),couriers=[];let cg='';
+for(let i=0;i<24;i++){couriers.push({r:routes[i%routes.length],s:cr()*40,v:(1.3+cr()*1.4)*(cr()<.5?-1:1)});
+  cg+=`<circle r="3.3" fill="${cols[i%cols.length]}" filter="url(#glow)"/>`;}
+const cG=document.getElementById('couriers');cG.innerHTML=cg;const dots=[...cG.children];
+function place(c,el){const{r}=c;let s=((c.s%(r.closed?r.L:2*r.L))+(r.closed?r.L:2*r.L))%(r.closed?r.L:2*r.L);
+  if(!r.closed&&s>r.L)s=2*r.L-s;
+  const g=r.seg.find(q=>s<=q[2]+q[3])||r.seg.at(-1),t=(s-g[2])/g[3];
+  const p=iso(g[0][0]+(g[1][0]-g[0][0])*t,g[0][1]+(g[1][1]-g[0][1])*t);
+  el.setAttribute('cx',p[0].toFixed(1));el.setAttribute('cy',(p[1]-3).toFixed(1));}
+couriers.forEach((c,i)=>place(c,dots[i]));
+if(!reduce){let last=performance.now();
+  const tick=now=>{const dt=Math.min(.05,(now-last)/1000);last=now;couriers.forEach((c,i)=>{c.s+=c.v*dt;place(c,dots[i])});requestAnimationFrame(tick)};
+  requestAnimationFrame(tick);}
+
+/* ---------- UI ---------- */
+const panel=document.getElementById('panel'),tip=document.getElementById('tip'),map=document.getElementById('map');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const resBtn=a=>`<button class="res" data-pick="${a[0]}" style="--c:${D[a[2]].color}"><i></i><b>${esc(a[1])}</b><span>${a[0]}</span></button>`;
+
+function overview(){
+  panel.innerHTML=`<span class="tag" style="--c:${D.mayor.color}"><i></i>как это работает</span>
+  <h2>Вы ставите задачу — город делает</h2>
+  <p>Большую задачу отдайте мэру: он сам решит, какие районы подключить. Узкую можно дать сразу нужному жителю, назвав его по имени.</p>
+  <div class="chain"><span>Вы</span>→<span>Мэр</span>→<span>Районы</span>→<span>Готовый результат</span></div>
+  <p>Нажмите на любое здание на карте или выберите жителя из списка ниже.</p>`;
+}
+function copyBtn(text){return `<button class="copy" data-copy="${esc(text)}">Скопировать запрос</button>`}
+function agent(id){
+  const a=byId[id],k=a[2],dd=D[k],lead=leads[k],q=`Используй ${a[0]}: ${a[4]}`;
+  const chain=id==='city-mayor'?'<span>Вы</span>→<span>Мэр</span>':`<span>Вы</span>→<span>Мэр</span>→${lead!==id?`<span>${esc(byId[lead][1])}</span>→`:''}<span>${esc(a[1])}</span>`;
+  panel.innerHTML=`<span class="tag" style="--c:${dd.color}"><i></i>${dd.name}</span>
+  <h2>${esc(a[1])}</h2>
+  <div class="code"><code>${a[0]}</code></div>
+  <p>${esc(a[3])}</p>
+  ${id==='city-mayor'?`<p style="color:var(--ink)">Порядок работы над большим проектом:</p><ol class="steps">${PIPE.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}
+  <div class="call"><small>пример запроса</small><q>${esc(q)}</q>${copyBtn(q)}</div>
+  <div class="chain">${chain}</div>`;
+}
+function district(k){
+  if(k==='lib')return library();
+  if(k==='mayor')return agent('city-mayor');
+  const dd=D[k],list=A.filter(a=>a[2]===k);
+  panel.innerHTML=`<span class="tag" style="--c:${dd.color}"><i></i>район · ${list.length} жителей</span>
+  <h2>${dd.name}</h2><p>${dd.desc}</p><div class="reslist">${list.map(a=>`<button class="res" data-pick="${a[0]}" style="--c:${dd.color}"><b>${esc(a[1])}</b></button>`).join('')}</div>`;
+}
+function library(){
+  panel.innerHTML=`<span class="tag" style="--c:${D.lib.color}"><i></i>библиотека · 30 скиллов</span>
+  <h2>Библиотека скиллов</h2><p>${D.lib.desc}</p>
+  ${SK.map(([g,l])=>`<div class="skillgroup"><h3>${g}</h3><div>${l.map(s=>`<code>${s}</code>`).join('')}</div></div>`).join('')}`;
+}
+
+let selected=null,filter='all';
+function select(id){
+  svg.querySelectorAll('.bld.sel').forEach(g=>g.classList.remove('sel'));
+  document.querySelectorAll('.res.on').forEach(b=>b.classList.remove('on'));
+  selected=id;
+  const g=svg.querySelector(`.bld[data-id="${id}"]`);if(g)g.classList.add('sel');
+  document.querySelectorAll(`#dir .res[data-pick="${id}"]`).forEach(b=>b.classList.add('on'));
+  id==='library'?library():agent(id);
+}
+function setFilter(k){
+  filter=k;
+  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.f===k));
+  svg.querySelectorAll('.bld').forEach(g=>g.classList.toggle('dim',k!=='all'&&g.dataset.d!==k));
+  k==='all'?(selected?select(selected):overview()):district(k);
+}
+function narrowScroll(){if(innerWidth<=960)panel.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'})}
+
+// chips
+const chips=document.getElementById('chips');
+chips.innerHTML=`<button class="chip" data-f="all" aria-pressed="true">Весь город</button>`+
+  ['mayor',...DORDER,'lib'].map(k=>`<button class="chip" data-f="${k}" aria-pressed="false" style="--c:${D[k].color}"><i></i>${D[k].name}</button>`).join('');
+chips.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)setFilter(b.dataset.f)});
+
+// directory
+document.getElementById('dir').innerHTML=['mayor',...DORDER].map(k=>{const l=A.filter(a=>a[2]===k);
+  return `<div class="dblock" style="--c:${D[k].color}"><h3><i></i>${D[k].name}<small>${l.length}</small></h3>${l.map(resBtn).join('')}</div>`}).join('')+
+  `<div class="dblock" style="--c:${D.lib.color}"><h3><i></i>${D.lib.name}<small>30</small></h3><button class="res" data-pick="library" style="--c:${D.lib.color}"><i></i><b>Все скиллы по группам</b><span>.claude/skills</span></button></div>`;
+
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-pick]');if(p){select(p.dataset.pick);narrowScroll();return}
+  const c=e.target.closest('[data-copy]');if(c){const t=c.dataset.copy;
+    const done=()=>{c.textContent='Скопировано';setTimeout(()=>c.textContent='Скопировать запрос',1600)};
+    try{navigator.clipboard.writeText(t).then(done,()=>{selectText(c)})}catch(_){selectText(c)}}
+});
+function selectText(c){const q=c.parentElement.querySelector('q');const r=document.createRange();r.selectNodeContents(q);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+svg.addEventListener('click',e=>{
+  const g=e.target.closest('.bld');if(g){select(g.dataset.id);narrowScroll();return}
+  const s=e.target.closest('.sign');if(s){setFilter(s.dataset.sign);narrowScroll()}
+});
+svg.addEventListener('keydown',e=>{const g=e.target.closest('.bld');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();select(g.dataset.id)}});
+svg.addEventListener('pointermove',e=>{
+  const g=e.target.closest('.bld');if(!g||e.pointerType==='touch'){tip.hidden=true;return}
+  const id=g.dataset.id,name=id==='library'?'Библиотека скиллов':byId[id][1];
+  tip.innerHTML=`<b>${id==='library'?'.claude/skills':id}</b>${esc(name)}`;tip.hidden=false;
+  const r=map.getBoundingClientRect();let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
+  if(x+tip.offsetWidth>r.width-8)x=e.clientX-r.left-tip.offsetWidth-14;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+});
+svg.addEventListener('pointerleave',()=>tip.hidden=true);
+overview();
+</script>
