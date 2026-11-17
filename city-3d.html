@@ -1,0 +1,498 @@
+<title>Город Агентов 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a WebGL night city fills the stage; the info panel floats over its right edge on desktop and drops below on phones; resident directory follows. Single deliberate night look, shared with the flat map. */
+:root{
+  color-scheme:dark;
+  --night:#0d1024; --panel:#161a34ee; --panel-solid:#161a34; --road:#232950; --line:#313968;
+  --ink:#eceaff; --muted:#a2a7cf; --glow:#ffd88a;
+  --f-display:"Unbounded",system-ui,sans-serif;
+  --f-body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+html,body{background:var(--night);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1500px;margin:0 auto;padding-block:26px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px}
+header .t{display:grid;gap:10px;min-width:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,5vw,54px);line-height:1.02;margin:0;letter-spacing:-.01em}
+h1 span{color:var(--glow)}
+h1 sup{font-family:var(--f-mono);font-weight:500;font-size:.32em;letter-spacing:.06em;color:var(--night);background:var(--glow);padding:3px 8px;border-radius:6px;vertical-align:super;margin-left:8px}
+.lede{max-width:62ch;color:var(--muted);margin:0}
+.links{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.links a{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip,.btn{font:500 13px var(--f-body);color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--muted))}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--night);border-color:var(--ink)}
+.btn{background:#0d1024cc;backdrop-filter:blur(6px)}
+:is(.chip,.btn,.res,.copy,.lbl):focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+
+.stagewrap{position:relative;display:grid}
+.stage{position:relative;height:clamp(440px,76vh,880px);border:1px solid var(--line);border-radius:20px;overflow:hidden;background:radial-gradient(120% 80% at 50% 0%,#232a5c,var(--night) 70%);touch-action:none}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage canvas.hover{cursor:pointer}
+.stage canvas:active{cursor:grabbing}
+#labels{position:absolute;inset:0;pointer-events:none}
+.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;white-space:nowrap;font:500 12.5px var(--f-display);color:var(--night);background:var(--c);border:0;border-radius:10px;padding:5px 10px;box-shadow:0 6px 18px #0007}
+.lbl small{font:400 11px var(--f-mono);margin-left:6px;opacity:.8}
+.lbl::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:14px;background:var(--c);transform:translateX(-50%);opacity:.7}
+.lbl.dim{opacity:.25}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--night);padding:7px 11px;border-radius:10px;font-size:13px;line-height:1.3;max-width:240px;box-shadow:0 8px 24px #0008;z-index:3}
+.tip b{display:block;font-family:var(--f-mono);font-weight:500;font-size:12px}
+.tools{position:absolute;left:14px;top:14px;display:flex;flex-wrap:wrap;gap:8px;z-index:2}
+.hint{position:absolute;left:14px;bottom:12px;font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;pointer-events:none}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
+
+.panel{position:absolute;top:14px;right:14px;width:350px;max-height:calc(100% - 28px);overflow:auto;background:var(--panel);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:13px;align-content:start;z-index:2;min-width:0}
+@media (max-width:900px){.panel{position:static;width:auto;max-height:none;margin-top:14px;background:var(--panel-solid)}}
+.panel h2{font-family:var(--f-display);font-weight:500;font-size:21px;line-height:1.15;margin:0;text-wrap:balance}
+.panel p{margin:0;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tag i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.code code{font-family:var(--f-mono);font-size:13.5px;background:var(--road);padding:4px 9px;border-radius:7px}
+.call{background:var(--night);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.call small{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.call q{quotes:"«" "»"}
+.copy{justify-self:start;font:500 13px var(--f-body);background:var(--glow);color:var(--night);border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.chain span{background:var(--road);color:var(--ink);padding:3px 8px;border-radius:6px}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:5px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;align-items:baseline}
+.steps li::before{content:counter(s);font-family:var(--f-mono);font-size:12px;color:var(--glow)}
+.reslist{display:flex;flex-wrap:wrap;gap:6px}
+.skillgroup{display:grid;gap:6px}
+.skillgroup h3{margin:0;font:600 13px var(--f-body)}
+.skillgroup div{display:flex;flex-wrap:wrap;gap:5px}
+.skillgroup code{font-family:var(--f-mono);font-size:12px;background:var(--road);padding:2px 7px;border-radius:6px}
+
+.dir{display:grid;gap:20px}
+.dir > h2{font-family:var(--f-display);font-weight:500;font-size:23px;margin:0}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px}
+.dblock{display:grid;gap:8px;align-content:start;min-width:0}
+.dblock h3{margin:0 0 4px;display:flex;align-items:center;gap:10px;font:600 15px var(--f-body)}
+.dblock h3 i{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.dblock h3 small{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-size:12px}
+.res{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;text-align:left;width:100%;background:transparent;border:0;border-top:1px solid var(--line);padding:8px 2px;color:var(--ink);cursor:pointer;font:inherit}
+.res:hover,.res.on{background:#ffffff0d}
+.res i{grid-row:span 2;width:4px;border-radius:2px;background:var(--c);align-self:stretch}
+.res b{font-weight:500;font-size:14.5px}
+.res span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.panel .res{border:1px solid var(--line);border-radius:8px;padding:5px 9px;width:auto;display:inline-flex}
+footer{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+footer a{color:var(--ink)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="t">
+      <div class="eyebrow">Claude Code · 54 агента · 30 скиллов</div>
+      <h1>Город <span>Агентов</span><sup>3D</sup></h1>
+      <p class="lede">Крутите город мышью или пальцем, приближайте колесом или щипком. Нажмите на здание: камера подлетит к нему, а в панели появится, кто там работает и как его позвать.</p>
+    </div>
+    <div class="links">
+      <a href="https://claude.ai/artifact/712nCfwMPJPRpzEFvZMkuh" target="_blank" rel="noopener">Плоская карта</a>
+      <a href="https://github.com/laborcelle0808-ai/agent-city" target="_blank" rel="noopener">Репозиторий</a>
+    </div>
+  </header>
+
+  <div class="chips" id="chips" role="group" aria-label="Подсветить район"></div>
+
+  <div class="stagewrap">
+    <div class="stage" id="stage">
+      <div id="labels"></div>
+      <div class="tools">
+        <button class="btn" id="reset" type="button">Весь город</button>
+        <button class="btn" id="spin" type="button" aria-pressed="true">Остановить вращение</button>
+      </div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="hint">тяните — вращать · колесо — приблизить · правая кнопка — сдвинуть</div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section class="dir">
+    <h2>Жители города</h2>
+    <div class="dgrid" id="dir"></div>
+  </section>
+  <footer>Агенты — в <code>.claude/agents</code>, скиллы — в <code>.claude/skills</code> репозитория <a href="https://github.com/laborcelle0808-ai/agent-city" target="_blank" rel="noopener">agent-city</a>.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+const D={
+  mayor:{name:'Мэрия',color:'#f3e3b3',slot:[1,1],desc:'Мэр принимает большую задачу, раскладывает её по районам и собирает готовый результат.'},
+  smm:{name:'SMM-квартал',color:'#ff8099',slot:[0,0],desc:'Стратегия, тексты, площадки, реклама и аналитика соцсетей.'},
+  art:{name:'Арт-квартал',color:'#f6d06a',slot:[0,1],desc:'Сильные дизайнеры и аниматоры: арт-дирекшн, 3D, шейдеры, анимация персонажей, видео.'},
+  design:{name:'Квартал дизайна',color:'#b59dff',slot:[0,2],desc:'Интерфейсы, фирменный стиль, графика для соцсетей, моушн и презентации.'},
+  qa:{name:'Испытательный полигон',color:'#ff9d5c',slot:[1,0],desc:'Тестировщики: от ручных проверок до нагрузки, доступности и игр. Вердикт перед запуском.'},
+  lib:{name:'Библиотека скиллов',color:'#e7a6ff',slot:[1,2],desc:'30 скиллов — готовые методички, которые агенты загружают перед работой.'},
+  cyber:{name:'Кибер-квартал',color:'#5fe0b0',slot:[2,0],desc:'Этичные хакеры. Проверяют только ваши системы или системы, на которые есть письменное разрешение владельца.'},
+  tech:{name:'Технопарк',color:'#5cc6ff',slot:[2,1],desc:'Разработка сайтов, программ, ботов, приложений, баз данных и деплой.'},
+  park:{name:'Центральный парк',color:'#7bd88f',slot:[2,2]}
+};
+const A=[
+ ['city-mayor','Мэр','mayor','Оркестратор: разбивает большую задачу на части и раздаёт её районам, потом собирает итог.','Запусти бренд кофейни под ключ: стратегия, логотип, лендинг и контент-план'],
+ ['smm-strategist','SMM-стратег','smm','Стратегия, анализ аудитории и конкурентов, позиционирование, KPI и контент-воронка.','Составь SMM-стратегию для кофейни на 3 месяца'],
+ ['copywriter','Копирайтер','smm','Тексты постов, сторис, рекламы, лендингов и рассылок на русском, украинском и английском.','Напиши 5 постов для Instagram про запуск нового меню'],
+ ['instagram-expert','Эксперт Instagram','smm','Шапка профиля, Reels, карусели, сторис, хештеги и рост аккаунта.','Перепиши шапку профиля и предложи 10 идей для Reels'],
+ ['tiktok-reels-expert','Эксперт коротких видео','smm','Сценарии для TikTok, Reels и Shorts: хуки, тренды, раскадровки.','Сценарий вирусного ролика на 20 секунд'],
+ ['telegram-expert','Эксперт Telegram','smm','Каналы, посевы, рост подписчиков и закупка рекламы.','План роста канала до 5000 подписчиков'],
+ ['youtube-expert','Эксперт YouTube','smm','Идеи и сценарии роликов, названия для поиска, превью, удержание.','10 названий и ТЗ на превью для ролика'],
+ ['linkedin-facebook-expert','Эксперт LinkedIn и Facebook','smm','B2B-контент, личный бренд, страницы и группы.','Экспертный пост для LinkedIn о кейсе клиента'],
+ ['community-manager','Комьюнити-менеджер','smm','Ответы в комментариях и директ, работа с негативом, конкурсы.','Шаблоны ответов на 10 частых вопросов'],
+ ['ads-targetologist','Таргетолог','smm','Реклама в Meta, TikTok, Telegram и Google: аудитории, бюджеты, тесты.','Медиаплан рекламы на $500 в Instagram'],
+ ['social-analyst','Аналитик соцсетей','smm','Метрики, отчёты, ER, CPL, ROMI и рекомендации.','Проанализируй выгрузку статистики за месяц'],
+ ['art-director','Арт-директор','art','Главный дизайнер города: концепции, мудборды и проверка качества всех работ.','Предложи 3 визуальных направления для бренда'],
+ ['creative-web-designer','Креативный веб-дизайнер','art','Сайты уровня Awwwards: смелая типографика и эффекты при прокрутке.','Премиальный лендинг с анимациями при прокрутке'],
+ ['illustrator','Иллюстратор','art','SVG-иллюстрации, персонажи, маскоты, иконки и паттерны.','Нарисуй маскота бренда в 5 эмоциях'],
+ ['3d-designer','3D-дизайнер','art','3D-сцены на сайтах (Three.js, Spline) и рендеры в Blender.','3D-сцена с продуктом для первого экрана'],
+ ['character-animator','Аниматор персонажей','art','Анимация персонажей, Lottie, Rive и стикеры для Telegram.','Оживи маскота: анимация ожидания и набор стикеров'],
+ ['webgl-motion-artist','WebGL-художник','art','Шейдеры, частицы и генеративные эффекты на сайтах.','Интерактивный «жидкий» фон для первого экрана'],
+ ['video-editor','Видеомонтажёр','art','Монтаж, субтитры, форматы под соцсети, видео из кода.','Смонтируй Reels с субтитрами из 3 клипов'],
+ ['ai-visual-artist','AI-визуальщик','art','Промпты для Midjourney, Flux, Runway, Veo и других генераторов.','5 промптов для фото продукта в едином стиле'],
+ ['ui-ux-designer','UI/UX-дизайнер','design','Прототипы, пользовательские сценарии, дизайн-системы, UX-аудит.','Прототип личного кабинета в HTML'],
+ ['brand-designer','Бренд-дизайнер','design','Логотипы, фирменный стиль, брендбук, нейминг и палитры.','3 концепции логотипа в SVG для студии йоги'],
+ ['social-graphic-designer','Дизайнер для соцсетей','design','Посты, карусели, сторис, баннеры и превью в PNG.','Карусель из 7 слайдов по нашему брендбуку'],
+ ['motion-designer','Моушн-дизайнер','design','Анимации интерфейса, анимированные баннеры и GIF.','Анимированный баннер для сторис'],
+ ['presentation-designer','Дизайнер презентаций','design','Питч-деки, коммерческие предложения, медиакиты.','Питч-дек на 10 слайдов для инвесторов'],
+ ['qa-lead','Руководитель тестирования','qa','Стратегия тестирования и вердикт «можно запускать или нет».','Протестируй лендинг и скажи, можно ли запускать'],
+ ['qa-tester','Тестировщик','qa','Ручное тестирование, чек-листы и баг-репорты.','Пройди все формы сайта и опиши баги'],
+ ['e2e-automation-engineer','Инженер автотестов','qa','Автотесты Playwright: сценарии пользователя, формы, оплата.','Автотест на оформление заказа'],
+ ['api-tester','Тестировщик API','qa','Позитивные и негативные проверки, схемы ответов, контракты.','Тесты для всех методов API'],
+ ['performance-tester','Тестировщик скорости','qa','Нагрузка k6 и Locust, скорость сайта в Lighthouse.','Выдержит ли сайт 500 посетителей одновременно'],
+ ['accessibility-tester','Тестировщик доступности','qa','Проверка по WCAG 2.2: клавиатура, контраст, экранные чтецы.','Проверь доступность главной страницы'],
+ ['visual-regression-tester','Тестировщик вёрстки','qa','Скриншот-тесты на всех экранах и сверка с макетом.','Сравни вёрстку на телефоне и на компьютере'],
+ ['usability-tester','Юзабилити-тестировщик','qa','Понятен ли сайт людям: путь до цели и тест пяти секунд.','Пройди путь покупателя от лица трёх клиентов'],
+ ['game-tester','Тестировщик игр','qa','Браузерные игры, Telegram Mini Apps, интерактив и FPS.','Протестируй игру в Telegram Mini App'],
+ ['pentest-lead','Руководитель пентеста','cyber','Планирует проверку безопасности ваших систем и собирает отчёт.','Проверь безопасность моего сайта'],
+ ['web-pentester','Веб-пентестер','cyber','Ищет XSS, SQL-инъекции, обход авторизации в ваших приложениях.','Найди уязвимости в форме входа на моём сайте'],
+ ['api-hacker','Хакер API','cyber','Безопасность REST и GraphQL API, вебхуков и ботов.','Проверь, не видны ли чужие заказы через моё API'],
+ ['recon-analyst','Разведчик','cyber','Что о вашем проекте видно снаружи: поддомены, утечки ключей, забытые сервисы.','Найди мои забытые поддомены и открытые сервисы'],
+ ['cloud-security-hacker','Защитник облака','cyber','Серверы, Docker, облака и безопасный CI/CD.','Аудит моего сервера и Docker-образа'],
+ ['mobile-security-tester','Мобильная безопасность','cyber','Проверка ваших iOS и Android приложений по OWASP MASVS.','Проверь мой APK на зашитые ключи'],
+ ['bug-bounty-hunter','Багхантер','cyber','Ищет баги строго по правилам официальных bug bounty программ.','Разбери правила программы и составь план'],
+ ['incident-responder','Спасатель при взломе','cyber','Помогает, если взломали сайт, соцсеть или бота.','Угнали Instagram — что делать по шагам'],
+ ['web-architect','Архитектор','tech','Выбор стека, архитектура, структура проекта и ТЗ.','Выбери стек и составь ТЗ для онлайн-школы'],
+ ['frontend-dev','Frontend-разработчик','tech','React, Next.js, Vue, TypeScript, Tailwind, адаптив.','Сверстай каталог товаров на Next.js'],
+ ['backend-dev','Backend-разработчик','tech','API, авторизация, платежи и интеграции.','API с авторизацией и оплатой'],
+ ['fullstack-site-builder','Сборщик сайтов','tech','Лендинги и сайты под ключ: от макета до публикации.','Лендинг для барбершопа с формой записи'],
+ ['mobile-dev','Мобильный разработчик','tech','iOS и Android на React Native, Flutter, Swift, Kotlin.','Приложение-трекер привычек на Expo'],
+ ['desktop-python-dev','Разработчик программ','tech','Программы для компьютера, утилиты, парсеры, обработка файлов.','Программа для пакетного сжатия фото'],
+ ['bot-developer','Разработчик ботов','tech','Telegram, WhatsApp и AI-боты, воронки, мини-аппы.','Telegram-бот для записи клиентов'],
+ ['automation-engineer','Инженер автоматизации','tech','n8n, Make, API соцсетей, автопостинг, CRM.','Заявки с сайта — в таблицу и уведомление в Telegram'],
+ ['database-engineer','Инженер баз данных','tech','Схемы БД, SQL, миграции, Supabase и Firebase.','Спроектируй базу для интернет-магазина'],
+ ['devops-engineer','DevOps-инженер','tech','Docker, CI/CD, серверы, домены, SSL и публикация.','Настрой автопубликацию сайта через GitHub Actions'],
+ ['code-reviewer','Код-ревьюер','tech','Проверка кода на баги, читаемость и скорость.','Проверь код бота перед запуском'],
+ ['security-auditor','Аудитор безопасности','tech','Проверка кода по OWASP Top 10 и поиск утечек ключей.','Проверь проект на утечки ключей'],
+ ['seo-specialist','SEO-специалист','tech','SEO-аудит, семантика, мета-теги, schema.org.','SEO-аудит лендинга и список правок']
+];
+const SK=[
+ ['SMM',['smm-strategy','content-plan','post-writing','hashtag-research','video-script','ad-campaign','analytics-report']],
+ ['Дизайн',['brand-guidelines','social-graphics','design-system','ux-audit']],
+ ['Арт и анимация',['art-direction','animation-craft','svg-illustration','3d-web','video-editing','ai-image-prompts']],
+ ['Разработка',['landing-page','telegram-bot','seo-audit','code-review-checklist']],
+ ['Безопасность',['pentest-methodology','vuln-report','security-hardening']],
+ ['Тестирование',['test-strategy','e2e-playwright','api-testing','performance-testing','accessibility-testing']],
+ ['Общие',['launch-checklist']]
+];
+const PIPE=['Стратегия','Арт-концепция','Бренд и дизайн','Разработка','Анимации','Тестирование','Проверка безопасности','Контент','Запуск','Аналитика'];
+const byId=Object.fromEntries(A.map(a=>[a[0],a]));
+const leads={};A.forEach(a=>{if(!leads[a[2]])leads[a[2]]=a[0]});
+const DORDER=['smm','art','design','tech','cyber','qa'];
+const plotOrigin=k=>{const[r,c]=D[k].slot;return[1+6*c,1+6*r]};
+const rng=seed=>()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const hash=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const panel=document.getElementById('panel'),stage=document.getElementById('stage'),tip=document.getElementById('tip');
+
+/* ---------- panel content ---------- */
+const resBtn=a=>`<button class="res" data-pick="${a[0]}" style="--c:${D[a[2]].color}"><i></i><b>${esc(a[1])}</b><span>${a[0]}</span></button>`;
+function overview(){
+  panel.innerHTML=`<span class="tag" style="--c:${D.mayor.color}"><i></i>как это работает</span>
+  <h2>Вы ставите задачу, город её делает</h2>
+  <p>Большую задачу отдайте мэру: он сам решит, какие районы подключить. Узкую можно дать сразу нужному жителю, назвав его по имени.</p>
+  <div class="chain"><span>Вы</span>→<span>Мэр</span>→<span>Районы</span>→<span>Готовый результат</span></div>
+  <p>Нажмите на здание или на вывеску района.</p>`;
+}
+function agent(id){
+  const a=byId[id],k=a[2],dd=D[k],lead=leads[k],q=`Используй ${a[0]}: ${a[4]}`;
+  const chain=id==='city-mayor'?'<span>Вы</span>→<span>Мэр</span>':`<span>Вы</span>→<span>Мэр</span>→${lead!==id?`<span>${esc(byId[lead][1])}</span>→`:''}<span>${esc(a[1])}</span>`;
+  panel.innerHTML=`<span class="tag" style="--c:${dd.color}"><i></i>${dd.name}</span>
+  <h2>${esc(a[1])}</h2><div class="code"><code>${a[0]}</code></div><p>${esc(a[3])}</p>
+  ${id==='city-mayor'?`<p style="color:var(--ink)">Порядок работы над большим проектом:</p><ol class="steps">${PIPE.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}
+  <div class="call"><small>пример запроса</small><q>${esc(q)}</q><button class="copy" type="button" data-copy="${esc(q)}">Скопировать запрос</button></div>
+  <div class="chain">${chain}</div>`;
+}
+function library(){
+  panel.innerHTML=`<span class="tag" style="--c:${D.lib.color}"><i></i>библиотека · 30 скиллов</span><h2>Библиотека скиллов</h2><p>${D.lib.desc}</p>
+  ${SK.map(([g,l])=>`<div class="skillgroup"><h3>${g}</h3><div>${l.map(s=>`<code>${s}</code>`).join('')}</div></div>`).join('')}`;
+}
+function district(k){
+  if(k==='lib')return library();
+  if(k==='mayor')return agent('city-mayor');
+  const dd=D[k],list=A.filter(a=>a[2]===k);
+  panel.innerHTML=`<span class="tag" style="--c:${dd.color}"><i></i>район · ${list.length} жителей</span><h2>${dd.name}</h2><p>${dd.desc}</p>
+  <div class="reslist">${list.map(a=>`<button class="res" data-pick="${a[0]}" style="--c:${dd.color}"><b>${esc(a[1])}</b></button>`).join('')}</div>`;
+}
+
+/* ---------- chips & directory ---------- */
+const KEYS=['mayor',...DORDER,'lib'];
+document.getElementById('chips').innerHTML=`<button class="chip" data-f="all" aria-pressed="true">Весь город</button>`+KEYS.map(k=>`<button class="chip" data-f="${k}" aria-pressed="false" style="--c:${D[k].color}"><i></i>${D[k].name}</button>`).join('');
+document.getElementById('dir').innerHTML=['mayor',...DORDER].map(k=>{const l=A.filter(a=>a[2]===k);
+  return `<div class="dblock" style="--c:${D[k].color}"><h3><i></i>${D[k].name}<small>${l.length}</small></h3>${l.map(resBtn).join('')}</div>`}).join('')+
+  `<div class="dblock" style="--c:${D.lib.color}"><h3><i></i>${D.lib.name}<small>30</small></h3><button class="res" data-pick="library" style="--c:${D.lib.color}"><i></i><b>Все скиллы по группам</b><span>.claude/skills</span></button></div>`;
+
+/* ---------- 3D ---------- */
+let city=null;
+try{ if(!window.THREE||!THREE.OrbitControls) throw new Error('three'); city=build3D(); }
+catch(err){ const n=document.createElement('div');n.className='nogl';n.innerHTML='<p>3D не запустилось в этом браузере. Список жителей ниже работает, а плоская карта открывается по ссылке вверху.</p>';stage.appendChild(n);document.querySelector('.tools').hidden=true;console.error(err); }
+
+function build3D(){
+  const W0=stage.clientWidth,H0=stage.clientHeight,narrow=W0<700;
+  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(W0,H0);
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
+  stage.prepend(renderer.domElement);
+  const scene=new THREE.Scene();
+  const NIGHT=new THREE.Color('#0d1024');
+  scene.background=NIGHT.clone();scene.fog=new THREE.FogExp2('#0d1024',.022);
+  const camera=new THREE.PerspectiveCamera(narrow?52:40,W0/H0,.1,300);
+  const HOME={pos:new THREE.Vector3(15.5,13.5,15.5),target:new THREE.Vector3(0,1,0)};
+  if(narrow)HOME.pos.multiplyScalar(1.35);
+  camera.position.copy(HOME.pos);
+  const controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.target.copy(HOME.target);controls.enableDamping=true;controls.dampingFactor=.08;
+  controls.maxPolarAngle=Math.PI*.46;controls.minDistance=5;controls.maxDistance=46;
+  controls.autoRotate=!reduce;controls.autoRotateSpeed=.45;controls.screenSpacePanning=false;
+
+  // light
+  scene.add(new THREE.HemisphereLight('#4b58b8','#0d1024',.22));
+  const moon=new THREE.DirectionalLight('#9fb0ff',.42);moon.position.set(-14,22,9);
+  if(!narrow){renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);
+    Object.assign(moon.shadow.camera,{left:-15,right:15,top:15,bottom:-15,near:1,far:70});moon.shadow.bias=-.0006;}
+  scene.add(moon);
+  const warm=new THREE.PointLight('#ffcf7a',.9,14,2);warm.position.set(0,6.5,0);scene.add(warm);
+
+  const C=(a,b,t)=>new THREE.Color(a).lerp(new THREE.Color(b),t);
+  const P=(gx,gy)=>[gx-9.5,gy-9.5];
+
+  // ground
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(22,23,.5,72),new THREE.MeshStandardMaterial({color:'#11152f',roughness:1}));
+  base.position.y=-.35;scene.add(base);
+  const road=new THREE.Mesh(new THREE.BoxGeometry(19,.2,19),new THREE.MeshStandardMaterial({color:'#161b3d',roughness:.9}));
+  road.position.y=-.1;road.receiveShadow=true;scene.add(road);
+  Object.keys(D).forEach(k=>{const[ox,oy]=plotOrigin(k),[x,z]=P(ox+2.5,oy+2.5),col=D[k].color;
+    const plot=new THREE.Mesh(new THREE.BoxGeometry(5,.08,5),new THREE.MeshStandardMaterial({color:C(col,'#121633',k==='park'?.72:.86),roughness:.85}));
+    plot.position.set(x,.04,z);plot.receiveShadow=true;scene.add(plot);
+    const edge=new THREE.LineSegments(new THREE.EdgesGeometry(plot.geometry),new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.45}));
+    edge.position.copy(plot.position);scene.add(edge);});
+  const ROUTES=[[[6.5,6.5],[12.5,6.5],[12.5,12.5],[6.5,12.5],[6.5,6.5]],[[.5,.5],[18.5,.5],[18.5,18.5],[.5,18.5],[.5,.5]],[[6.5,.5],[6.5,18.5]],[[12.5,.5],[12.5,18.5]],[[.5,6.5],[18.5,6.5]],[[.5,12.5],[18.5,12.5]]];
+  const dashMat=new THREE.LineDashedMaterial({color:'#5562c0',dashSize:.28,gapSize:.36,transparent:true,opacity:.8});
+  ROUTES.forEach(rt=>{const g=new THREE.BufferGeometry().setFromPoints(rt.map(p=>{const[x,z]=P(p[0],p[1]);return new THREE.Vector3(x,.015,z)}));
+    const l=new THREE.Line(g,dashMat);l.computeLineDistances();scene.add(l);});
+
+  // stars
+  {const n=900,pos=new Float32Array(n*3),r=rng(5);for(let i=0;i<n;i++){const th=r()*Math.PI*2,ph=Math.acos(r()*.9),R=110;
+    pos.set([R*Math.sin(ph)*Math.cos(th),R*Math.cos(ph)+5,R*Math.sin(ph)*Math.sin(th)],i*3)}
+   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+   scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:'#d4dbff',size:.5,sizeAttenuation:true,fog:false,transparent:true,opacity:.85})));}
+
+  // facade texture
+  function facade(col,seed){
+    const c=document.createElement('canvas');c.width=64;c.height=64;const g=c.getContext('2d'),r=rng(seed);
+    g.fillStyle='#'+C(col,'#0d1024',.74).getHexString();g.fillRect(0,0,64,64);
+    for(let y=0;y<4;y++)for(let x=0;x<3;x++){const lit=r()<.55;
+      g.fillStyle=lit?`rgba(255,${205+r()*40|0},${125+r()*45|0},${(.55+r()*.45).toFixed(2)})`:'#1e2347';g.fillRect(7+x*19,7+y*16,12,8);}
+    const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.encoding=THREE.sRGBEncoding;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;
+  }
+  const pickables=[],groups={},beacons=[];
+  function tower(group,x,z,w,d,y0,h,col,seed,withWindows=true){
+    const tex=withWindows?facade(col,seed):null;
+    if(tex)tex.repeat.set(Math.max(1,Math.round(w/.75)),Math.max(1,Math.round(h/.95)));
+    const side=new THREE.MeshStandardMaterial(tex?{map:tex,emissiveMap:tex,emissive:'#ffffff',emissiveIntensity:.62,roughness:.65,metalness:.15}:{color:C(col,'#0d1024',.55),roughness:.7});
+    const roof=new THREE.MeshStandardMaterial({color:C(col,'#0d1024',.35),emissive:col,emissiveIntensity:.1,roughness:.5});
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),[side,side,roof,roof,side,side]);
+    m.position.set(x,y0+h/2,z);m.castShadow=m.receiveShadow=true;group.add(m);
+    group.userData.mats.push(side,roof);return m;
+  }
+  function beacon(group,x,y,z,col,len=.5){
+    const mast=new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,len,6),new THREE.MeshStandardMaterial({color:'#8a90c0'}));
+    mast.position.set(x,y+len/2,z);group.add(mast);
+    const bulb=new THREE.Mesh(new THREE.SphereGeometry(.07,12,12),new THREE.MeshBasicMaterial({color:col}));
+    bulb.position.set(x,y+len,z);group.add(bulb);beacons.push(bulb);group.userData.mats.push(mast.material,bulb.material);
+  }
+  function makeGroup(id,d,x,z,top){const g=new THREE.Group();g.userData={id,d,mats:[],x,z,top};scene.add(g);groups[id]=g;return g}
+
+  const POS=[[2,2],[0,0],[4,4],[0,4],[4,0],[2,0],[0,2],[4,2],[2,4],[1,1],[3,3],[1,3],[3,1]];
+  DORDER.forEach(k=>{const[ox,oy]=plotOrigin(k),col=D[k].color;
+    A.filter(a=>a[2]===k).forEach((a,i)=>{
+      const[px,py]=POS[i],[x,z]=P(ox+px+.5,oy+py+.5),r=rng(hash(a[0])),lead=i===0;
+      const h=lead?3.7:1.2+r()*1.7,w=.72,g=makeGroup(a[0],k,x,z,h);
+      const m=tower(g,x,z,w,w,0,h,col,hash(a[0]));m.userData.id=a[0];pickables.push(m);
+      if(lead){const cap=tower(g,x,z,.44,.44,h,.45,col,hash(a[0])+1,false);cap.userData.id=a[0];pickables.push(cap);beacon(g,x,h+.45,z,col,.7);g.userData.top=h+1.2}
+      else if(r()<.35)beacon(g,x,h,z,col,.32);
+    });});
+  // mayor
+  {const col=D.mayor.color,g=makeGroup('city-mayor','mayor',0,0,6.9);
+    [[3.8,.55,0],[2.5,1.0,.55],[1.15,2.6,1.55]].forEach(([w,h,y],i)=>{const m=tower(g,0,0,w,w,y,h,col,90+i);m.userData.id='city-mayor';pickables.push(m)});
+    const spire=new THREE.Mesh(new THREE.ConeGeometry(.42,1.4,4),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.15,metalness:.4,roughness:.35}));
+    spire.position.set(0,4.15+.7,0);spire.rotation.y=Math.PI/4;spire.castShadow=true;spire.userData.id='city-mayor';g.add(spire);pickables.push(spire);g.userData.mats.push(spire.material);
+    beacon(g,0,5.55,0,'#ffd88a',.5);}
+  // library
+  {const col=D.lib.color,[ox,oy]=plotOrigin('lib'),[x,z]=P(ox+2.5,oy+2.4),g=makeGroup('library','lib',x,z,2.3);
+    const m=tower(g,x,z,4,2.8,0,1.05,col,77);m.userData.id='library';pickables.push(m);
+    const slab=tower(g,x,z,4.3,3.1,1.05,.16,col,78,false);slab.userData.id='library';pickables.push(slab);
+    const dome=new THREE.Mesh(new THREE.SphereGeometry(.9,32,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.12,metalness:.3,roughness:.35}));
+    dome.position.set(x,1.21,z);dome.castShadow=true;dome.userData.id='library';g.add(dome);pickables.push(dome);g.userData.mats.push(dome.material);
+    for(let i=0;i<6;i++){const col2=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,1.05,10),new THREE.MeshStandardMaterial({color:'#b8b0d8',roughness:.5}));
+      col2.position.set(x-1.6+i*.64,.525,z+1.55);col2.castShadow=true;g.add(col2);g.userData.mats.push(col2.material);}}
+  // park
+  {const[ox,oy]=plotOrigin('park'),r=rng(3),[fx,fz]=P(ox+2.5,oy+2.5);
+    const basin=new THREE.Mesh(new THREE.CylinderGeometry(.9,.95,.18,40),new THREE.MeshStandardMaterial({color:'#3a4378'}));basin.position.set(fx,.17,fz);scene.add(basin);
+    const water=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,.04,40),new THREE.MeshStandardMaterial({color:'#5fc3ff',emissive:'#3aa8ff',emissiveIntensity:.35,roughness:.15,metalness:.2}));water.position.set(fx,.26,fz);scene.add(water);
+    [[0.5,0.6],[1.5,0.3],[3.4,0.5],[4.4,1.4],[0.4,2],[4.5,3],[0.6,3.6],[1.6,4.5],[3.3,4.4],[4.3,4.4],[2.5,0.6],[0.5,4.6],[1.2,1.4],[3.8,2.2]].forEach(([tx,ty])=>{
+      const[x,z]=P(ox+tx,oy+ty),s=.8+r()*.5;
+      const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.05*s,.07*s,.4*s,6),new THREE.MeshStandardMaterial({color:'#4b3a2a'}));trunk.position.set(x,.08+.2*s,z);
+      const crown=new THREE.Mesh(r()<.5?new THREE.ConeGeometry(.32*s,.8*s,8):new THREE.IcosahedronGeometry(.34*s,0),new THREE.MeshStandardMaterial({color:C('#7bd88f','#0d1024',.25+r()*.25),roughness:.8,flatShading:true}));
+      crown.position.set(x,.08+.4*s+.36*s,z);trunk.castShadow=crown.castShadow=true;scene.add(trunk,crown);});}
+
+  // selection ring
+  const ringMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.9,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.55,.7,40),ringMat);ring.rotation.x=-Math.PI/2;ring.visible=false;scene.add(ring);
+
+  // couriers
+  const routes=ROUTES.map(rt=>{const seg=[];let L=0;for(let i=1;i<rt.length;i++){const l=Math.hypot(rt[i][0]-rt[i-1][0],rt[i][1]-rt[i-1][1]);seg.push([rt[i-1],rt[i],L,l]);L+=l}
+    return{seg,L,closed:rt[0][0]===rt.at(-1)[0]&&rt[0][1]===rt.at(-1)[1]}});
+  const cols=DORDER.map(k=>D[k].color).concat(['#ffd88a']),cr=rng(42),couriers=[];
+  const cGeo=new THREE.SphereGeometry(.085,12,12);
+  for(let i=0;i<26;i++){const m=new THREE.Mesh(cGeo,new THREE.MeshBasicMaterial({color:cols[i%cols.length]}));scene.add(m);
+    couriers.push({m,r:routes[i%routes.length],s:cr()*40,v:(1.1+cr()*1.3)*(cr()<.5?-1:1),b:cr()*6});}
+  function placeC(c,t){const{r}=c,M=r.closed?r.L:2*r.L;let s=((c.s%M)+M)%M;if(!r.closed&&s>r.L)s=2*r.L-s;
+    const g=r.seg.find(q=>s<=q[2]+q[3])||r.seg.at(-1),u=(s-g[2])/g[3];
+    const[x,z]=P(g[0][0]+(g[1][0]-g[0][0])*u,g[0][1]+(g[1][1]-g[0][1])*u);c.m.position.set(x,.14+Math.abs(Math.sin(t*6+c.b))*.05,z);}
+
+  // bloom
+  let composer=null,bloom=null;
+  try{composer=new THREE.EffectComposer(renderer);composer.addPass(new THREE.RenderPass(scene,camera));
+    bloom=new THREE.UnrealBloomPass(new THREE.Vector2(W0,H0),.7,.45,.72);composer.addPass(bloom);}catch(e){composer=null}
+
+  // labels
+  const labelsEl=document.getElementById('labels'),labels=[];
+  KEYS.forEach(k=>{const[ox,oy]=plotOrigin(k),[x,z]=P(ox+2.5,oy+2.5);
+    const top=k==='mayor'?7.0:k==='lib'?3.0:Math.max(...A.filter(a=>a[2]===k).map(a=>groups[a[0]].userData.top))+.5;
+    const n=k==='mayor'?'':k==='lib'?'30 скиллов':A.filter(a=>a[2]===k).length+' агентов';
+    const b=document.createElement('button');b.className='lbl';b.type='button';b.dataset.sign=k;b.style.setProperty('--c',D[k].color);
+    b.innerHTML=`${D[k].name}${n?`<small>${n}</small>`:''}`;labelsEl.appendChild(b);
+    labels.push({el:b,k,v:new THREE.Vector3(x,top,z)});});
+  const tmp=new THREE.Vector3();
+  function placeLabels(){const w=stage.clientWidth,h=stage.clientHeight;
+    labels.forEach(l=>{tmp.copy(l.v).project(camera);const vis=tmp.z<1&&Math.abs(tmp.x)<1.2&&Math.abs(tmp.y)<1.2;
+      l.el.style.visibility=vis?'visible':'hidden';
+      if(vis)l.el.style.transform=`translate(${((tmp.x+1)/2*w).toFixed(1)}px,${((1-tmp.y)/2*h-14).toFixed(1)}px) translate(-50%,-100%)`;});}
+
+  // camera flights
+  let fly=null;
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  function flyTo(target,pos){
+    if(reduce){controls.target.copy(target);camera.position.copy(pos);return}
+    fly={t:0,fT:controls.target.clone(),tT:target.clone(),fP:camera.position.clone(),tP:pos.clone()};
+  }
+  function focus(id){const g=groups[id];if(!g)return;const{x,z,top}=g.userData;
+    const target=new THREE.Vector3(x,Math.min(top*.5,2.2),z);
+    const dir=camera.position.clone().sub(controls.target);dir.y=0;dir.normalize();
+    const dist=id==='city-mayor'?13:id==='library'?11:10;
+    flyTo(target,target.clone().add(dir.multiplyScalar(dist)).setY(target.y+dist*.62));
+    ring.visible=true;const s=id==='city-mayor'?3.4:id==='library'?3.6:1;ring.scale.set(s,s,s);ring.position.set(x,.1,z);
+    ringMat.color.set(D[g.userData.d].color);setSpin(false);}
+  function home(){flyTo(HOME.target,HOME.pos);ring.visible=false}
+
+  // filter
+  function dim(k){Object.values(groups).forEach(g=>{const on=k==='all'||g.userData.d===k;
+    g.userData.mats.forEach(m=>{m.transparent=!on;m.opacity=on?1:.16;m.depthWrite=on;m.needsUpdate=true});});
+    labels.forEach(l=>l.el.classList.toggle('dim',k!=='all'&&l.k!==k));}
+
+  // picking
+  const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+  function pick(cx,cy){const r=renderer.domElement.getBoundingClientRect();ndc.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);
+    ray.setFromCamera(ndc,camera);const hit=ray.intersectObjects(pickables,false)[0];return hit?hit.object.userData.id:null}
+  let down=null,hoverReq=null;
+  const cv=renderer.domElement;
+  cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];fly=null});
+  cv.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<6){const id=pick(e.clientX,e.clientY);if(id)selectAndFocus(id)}down=null});
+  cv.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;hoverReq=e});
+  cv.addEventListener('pointerleave',()=>{hoverReq=null;tip.hidden=true;cv.classList.remove('hover')});
+  controls.addEventListener('start',()=>setSpin(false));
+  function doHover(){if(!hoverReq)return;const e=hoverReq;hoverReq=null;const id=pick(e.clientX,e.clientY);
+    cv.classList.toggle('hover',!!id);if(!id||down){tip.hidden=true;return}
+    tip.innerHTML=`<b>${id==='library'?'.claude/skills':id}</b>${esc(id==='library'?'Библиотека скиллов':byId[id][1])}`;tip.hidden=false;
+    const r=stage.getBoundingClientRect();let x=e.clientX-r.left+14;if(x+tip.offsetWidth>r.width-8)x=e.clientX-r.left-tip.offsetWidth-14;
+    tip.style.left=x+'px';tip.style.top=(e.clientY-r.top+14)+'px';}
+
+  // resize & visibility
+  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+    if(composer){composer.setSize(w,h);bloom.resolution.set(w,h)}}
+  new ResizeObserver(resize).observe(stage);
+  let visible=true;new IntersectionObserver(es=>{visible=es[0].isIntersecting}).observe(stage);
+
+  const clock=new THREE.Clock();
+  function frame(){requestAnimationFrame(frame);if(!visible||document.hidden){clock.getDelta();return}
+    const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+    if(fly){fly.t=Math.min(1,fly.t+dt/1.2);const e=ease(fly.t);controls.target.lerpVectors(fly.fT,fly.tT,e);camera.position.lerpVectors(fly.fP,fly.tP,e);if(fly.t>=1)fly=null}
+    controls.update();
+    controls.target.x=THREE.MathUtils.clamp(controls.target.x,-11,11);controls.target.z=THREE.MathUtils.clamp(controls.target.z,-11,11);controls.target.y=THREE.MathUtils.clamp(controls.target.y,0,5);
+    if(!reduce){couriers.forEach(c=>{c.s+=c.v*dt;placeC(c,t)});beacons.forEach((b,i)=>{const s=.75+.45*Math.sin(t*3+i*1.7);b.scale.setScalar(s)});
+      if(ring.visible){ringMat.opacity=.55+.4*Math.sin(t*4)}}
+    doHover();placeLabels();
+    composer?composer.render():renderer.render(scene,camera);}
+  couriers.forEach(c=>placeC(c,0));
+  frame();
+  return{focus,home,dim,setSpinState:v=>{controls.autoRotate=v}};
+}
+
+/* ---------- wiring ---------- */
+const spinBtn=document.getElementById('spin');
+function setSpin(v){if(city)city.setSpinState(v&&!reduce);spinBtn.setAttribute('aria-pressed',String(v&&!reduce));spinBtn.textContent=v&&!reduce?'Остановить вращение':'Включить вращение'}
+if(reduce)setSpin(false);
+spinBtn.addEventListener('click',()=>setSpin(spinBtn.getAttribute('aria-pressed')!=='true'));
+document.getElementById('reset').addEventListener('click',()=>{city&&city.home();setFilter('all',true);select(null)});
+
+let selected=null;
+function select(id){
+  selected=id;document.querySelectorAll('.res.on').forEach(b=>b.classList.remove('on'));
+  if(!id){overview();return}
+  document.querySelectorAll(`#dir .res[data-pick="${id}"]`).forEach(b=>b.classList.add('on'));
+  id==='library'?library():agent(id);
+}
+function selectAndFocus(id){select(id);city&&city.focus(id);if(innerWidth<=900)panel.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'})}
+function setFilter(k,quiet){
+  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.f===k)));
+  city&&city.dim(k);if(quiet)return;
+  if(k==='all'){selected?select(selected):overview();return}
+  district(k);
+  const focusId=k==='lib'?'library':k==='mayor'?'city-mayor':leads[k];if(city)city.focus(focusId);
+}
+document.getElementById('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)setFilter(b.dataset.f)});
+document.getElementById('labels').addEventListener('click',e=>{const b=e.target.closest('.lbl');if(b)setFilter(b.dataset.sign)});
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-pick]');if(p){selectAndFocus(p.dataset.pick);if(p.closest('#dir'))document.getElementById('stage').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});return}
+  const c=e.target.closest('[data-copy]');if(c){const t=c.dataset.copy,done=()=>{c.textContent='Скопировано';setTimeout(()=>c.textContent='Скопировать запрос',1600)};
+    const sel=()=>{const q=c.parentElement.querySelector('q'),r=document.createRange();r.selectNodeContents(q);const s=getSelection();s.removeAllRanges();s.addRange(r)};
+    try{navigator.clipboard.writeText(t).then(done,sel)}catch(_){sel()}}
+});
+overview();
+</script>
