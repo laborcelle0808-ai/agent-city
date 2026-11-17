@@ -159,6 +159,10 @@ function fly(gh,x,y,cb){var g=gh.g,r=gh.r,cur=g.style.transform||'translate(0px,
 if(!g.animate){kill(g);if(cb)cb();return;}
 var a=g.animate([{transform:cur},{transform:'translate('+mx+'px,'+my+'px) rotate(-8deg) scale(.9)',offset:.5},{transform:'translate('+tx+'px,'+ty+'px) scale(.3)',opacity:.3}],{duration:480,easing:'cubic-bezier(.45,0,.3,1)',fill:'forwards'});
 a.onfinish=function(){kill(g);if(cb)cb();};}
+/* land ghost exactly onto a target rect (scale to fit) */
+function snap(gh,t,cb){var g=gh.g,r=gh.r,tx=(t.left+t.width/2)-(r.left+r.width/2),ty=(t.top+t.height/2)-(r.top+r.height/2),k=t.width/r.width;
+if(!g.animate){kill(g);if(cb)cb();return;}
+var a=g.animate([{transform:g.style.transform||'none'},{transform:'translate('+tx+'px,'+ty+'px) scale('+k+')'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'});a.onfinish=function(){kill(g);if(cb)cb();};}
 function home(gh,cb){var g=gh.g;if(!g.animate){kill(g);if(cb)cb();return;}
 var a=g.animate([{transform:g.style.transform||'none'},{transform:'translate(0px,0px) scale(1)'}],{duration:380,easing:'cubic-bezier(.2,1.3,.4,1)',fill:'forwards'});a.onfinish=function(){kill(g);if(cb)cb();};}
 function bind(el,o){
@@ -176,7 +180,7 @@ window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up
 el.addEventListener('pointerdown',down);
 el.addEventListener('click',function(e){if(e.detail===0&&o.tap&&(!o.can||o.can()))o.tap();});/* keyboard */
 }
-return{bind:bind,ghostOf:ghostOf,fly:fly,home:home,
+return{bind:bind,ghostOf:ghostOf,fly:fly,snap:snap,home:home,
 clean:function(){live.slice().forEach(function(x){if(typeof x==='function')x();else kill(x);});live=[];}};}
 
 function hit(r,x,y,pad){pad=pad||0;return x>=r.left-pad&&x<=r.right+pad&&y>=r.top-pad&&y<=r.bottom+pad;}
@@ -479,14 +483,14 @@ function clearTgt(){Array.prototype.forEach.call(board.children,function(c){c.cl
 function slotAt(x,y){var ch=board.children;for(var i=0;i<ch.length;i++){if(hit(ch[i].getBoundingClientRect(),x,y,0))return ch[i];}return null;}
 function tryPut(el,s,gh){if(over)return;var pi=+el.getAttribute('data-p'),si=+s.getAttribute('data-s');
 if(pi===si&&!s.firstChild){var r=s.getBoundingClientRect();
-dr.fly(gh,r.left+r.width/2,r.top+r.height/2,function(){});
-/* settle: move real piece into slot (snap animation) */
-el.style.width='';el.style.height='';el.style.animationDelay='0s';el.classList.remove('x-gk-lift','sel');el.setAttribute('tabindex','-1');el.setAttribute('aria-label','Частинка на місці');s.appendChild(el);
+/* move real piece into slot hidden, ghost lands on it, then reveal with snap bounce */
+el.style.width='';el.style.height='';el.style.animation='none';el.style.visibility='hidden';el.classList.remove('x-gk-lift','sel');
+dr.snap(gh,r,function(){el.style.animation='';el.style.visibility='';});el.setAttribute('tabindex','-1');el.setAttribute('aria-label','Частинка на місці');s.appendChild(el);
 s.setAttribute('aria-label','Клітинка '+(si+1)+' — заповнено');placed++;snd.step();snd.ok();q('#x-gk-pp',root).textContent=placed+' / '+(n*n);
 say(placed===n*n?'Емблему зібрано!':['Точно на місці!','Чудово!','Так тримати!','Супер!'][placed%4],'ok');
 if(placed===n*n)win();}
 else{mist++;snd.no();dr.home(gh);s.classList.remove('no');void s.offsetWidth;s.classList.add('no');say(s.firstChild?'Ця клітинка вже зайнята. Пошукай вільну!':'Не зовсім тут. Подивись на підказку на полі!','no');}}
-function win(){over=true;dr.clean();board.classList.add('win');snd.win();A.confetti();
+function win(){over=true;board.classList.add('win');snd.win();A.confetti();
 var base=n===3?30:40,pts=clamp(base-mist*2,n===3?10:12,base);
 A.later(function(){A.gEnd(box,'puzzle','Пазл «Артан»','Емблему '+n+'×'+n+' зібрано'+(mist?', помилок: '+mist:' без жодної помилки')+'!',pts,mist<=n*2);},1700);}
 menu();

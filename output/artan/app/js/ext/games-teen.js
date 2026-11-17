@@ -184,7 +184,7 @@ function startAzimuth(box,A){css();var R=6,r=0,score=0,right=0,cur=null,busy=fal
       b.setAttribute('aria-label',names[k][1]);b.innerHTML='<b aria-hidden="true">'+names[k][0]+'</b><span aria-hidden="true">'+names[k][1]+'</span>';map.appendChild(b);});
     setAng(ang,false);}
   box.addEventListener('click',function(e){var s=e.target.closest('[data-x]');if(s){setAng(ang+(+s.getAttribute('data-x')),true);return;}
-    if(e.target.closest('.x-gt-go')){r++;round();window.scrollTo(0,0);return;}
+    if(e.target.closest('.x-gt-go')){r++;round();var tk=$('.x-gt-task',box);if(tk&&tk.scrollIntoView)tk.scrollIntoView({block:'start'});return;}
     var b=e.target.closest('.x-gt-lm');if(!b||busy)return;busy=true;var k=+b.getAttribute('data-k'),ok=k===0,bonus=angDiff(ang,cur.az)<=5;
     $$('.x-gt-lm',map).forEach(function(x){x.disabled=true;if(x.getAttribute('data-k')==='0')x.classList.add('good');});
     if(ok){right++;var g=5+(bonus?1:0);score+=g;tst.className='toast ok';tst.textContent='Точно! '+names[0][1]+' — '+cur.az+'°, '+cur.d+' м. +'+g+(bonus?' (бонус за точний курс)':'');var sc=$('#x-gt-sc',box);sc.textContent=score+' балів';sc.classList.remove('b');void sc.offsetWidth;sc.classList.add('b');}
