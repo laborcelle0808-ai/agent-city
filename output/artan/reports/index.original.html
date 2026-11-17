@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Артан — тестовий застосунок</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600&family=Ruslan+Display&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0B09;--sf:#151712;--sf2:#1E211A;--ln:#32372B;--tx:#EDEBE2;--mu:#A9AD9D;--ac:#C3C79A;--ye:#F2C230;--ok:#7BC47F;--bad:#EE8D7C;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
+body{background:radial-gradient(120% 60% at 50% 0%,#1A1D14 0%,var(--bg) 60%) fixed}
+#app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 16px 120px}
+h1,h2,h3{font-family:Oswald,Inter,sans-serif;font-weight:600;margin:0;line-height:1.15}
+h1{font-size:28px}h2{font-size:21px}h3{font-size:17px}p{margin:0}
+.wm{font-family:'Ruslan Display',Oswald,serif;font-weight:400;letter-spacing:3px;line-height:1}
+.mu{color:var(--mu)}.sm{font-size:13px}.ey{font-size:11px;letter-spacing:1.5px;font-weight:600;color:var(--ac);text-transform:uppercase}
+.stack{display:flex;flex-direction:column;gap:12px}.row{display:flex;align-items:center;gap:12px}.sb{justify-content:space-between}.wrap{display:flex;flex-wrap:wrap;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:linear-gradient(180deg,#191C15,#141610);border:1px solid var(--ln);border-radius:16px;padding:14px}
+button,.btn{font:inherit;font-weight:600;min-height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--ln);background:var(--sf2);color:var(--tx);cursor:pointer;text-align:center;transition:transform .15s var(--ease),background .2s,border-color .2s,box-shadow .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button:active,.btn:active{transform:scale(.96)}
+button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ye);outline-offset:2px}
+button[disabled]{opacity:.6;cursor:default}
+.pri{background:var(--ye);color:#14110A;border-color:var(--ye);box-shadow:0 6px 20px -8px rgba(242,194,48,.7)}
+.ghost{background:transparent}
+.view>*{animation:up .5s var(--ease) backwards}
+.view>*:nth-child(2){animation-delay:.05s}.view>*:nth-child(3){animation-delay:.1s}.view>*:nth-child(4){animation-delay:.15s}.view>*:nth-child(5){animation-delay:.2s}.view>*:nth-child(6){animation-delay:.25s}.view>*:nth-child(n+7){animation-delay:.3s}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes bump{50%{transform:scale(1.25)}}
+header.top{padding:22px 0 4px}
+.tile{flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;min-height:108px;text-align:left;padding:14px;border-radius:16px;background:linear-gradient(180deg,#191C15,#141610)}
+.tile svg{color:var(--ye)}.tile b{font-size:15px;display:block}.tile span{font-size:12.5px;color:var(--mu);font-weight:400}
+.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--ln);padding:18px;background:linear-gradient(135deg,#23271B,#12140E)}
+.hero:after{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent 0 80%,rgba(242,194,48,.12) 90%,transparent);animation:spin 9s linear infinite;pointer-events:none}
+.hero>*{position:relative;z-index:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.em{width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+.dots{display:flex;gap:6px}.dots button{min-height:0;width:24px;height:24px;padding:0;border:0;background:transparent}.dots i{display:block;width:8px;height:8px;border-radius:50%;background:var(--ln);margin:auto;transition:all .3s}.dots .on i{background:var(--ye);width:18px;border-radius:4px}
+.fade{animation:up .45s var(--ease) backwards}
+.bar{height:10px;border-radius:999px;background:var(--sf2);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ye));border-radius:999px;transition:width .8s var(--ease)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:4px}.seg button{min-height:40px;border:0;background:transparent;color:var(--mu);border-radius:10px}.seg button.on{background:var(--sf2);color:var(--ye)}
+.date{width:62px;flex:none;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;color:var(--ac);line-height:1.2;text-align:left}
+.ph{height:160px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:13px;text-align:center;padding:10px;border:1px dashed #6E7463;background:repeating-linear-gradient(45deg,#14160F 0 10px,#171A12 10px 20px)}
+.photo{width:100%;max-height:280px;object-fit:cover;border-radius:14px;display:block;animation:pop .5s var(--ease)}
+label{font-size:13px;color:var(--mu);display:block;margin-bottom:4px}
+input[type=text],input[type=tel],input[type=date]{width:100%;height:48px;padding:0 12px;border-radius:12px;border:1px solid #6E7463;background:var(--sf);color:var(--tx);font:inherit;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--ye);box-shadow:0 0 0 3px rgba(242,194,48,.18);outline:0}
+.chip{padding:8px 12px;border:1px solid #6E7463;border-radius:999px;font-size:13px;min-height:40px;background:transparent;font-weight:500}
+.chip.on{background:var(--ye);color:#14110A;border-color:var(--ye)}
+.msg{border-radius:12px;padding:12px;font-size:14px;animation:pop .35s var(--ease)}.msg.ok{background:#1B2A1C;border:1px solid var(--ok)}.msg.no{background:#2C1B18;border:1px solid var(--bad)}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--ye);color:#14110A;font-size:12px;font-weight:600}.badge.off{background:var(--sf2);color:var(--mu)}
+ul{margin:0;padding-left:20px}li{margin:6px 0}
+.opt{width:100%;justify-content:flex-start;text-align:left;font-weight:500;min-height:54px;padding:10px 14px}
+.opt.good{border-color:var(--ok);background:#1B2A1C;animation:bump .35s}.opt.wrong{border-color:var(--bad);background:#2C1B18;animation:shake .35s}
+/* nav */
+nav{position:fixed;left:0;right:0;bottom:0;padding:0 12px calc(12px + env(safe-area-inset-bottom));pointer-events:none;z-index:20}
+nav .in{pointer-events:auto;position:relative;max-width:456px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(20,22,16,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:22px;padding:6px;box-shadow:0 14px 40px -10px #000}
+nav .pill{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px)/5);border-radius:16px;background:linear-gradient(180deg,rgba(242,194,48,.2),rgba(242,194,48,.06));border:1px solid rgba(242,194,48,.35);transition:transform .45s var(--ease)}
+nav a{position:relative;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:500;color:var(--mu);text-decoration:none;border-radius:16px;transition:color .3s}
+nav a svg{transition:transform .45s var(--ease)}
+nav a.on{color:var(--ye);font-weight:600}nav a.on svg{transform:translateY(-2px) scale(1.14)}
+nav a:active svg{transform:scale(.85)}
+/* splash */
+#splash{position:fixed;inset:0;z-index:50;background:radial-gradient(80% 50% at 50% 45%,#22261A,#070806 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;transition:opacity .6s,visibility .6s}
+#splash.out{opacity:0;visibility:hidden}
+#splash .e{position:relative;width:190px;height:190px}
+#splash .e img{width:100%;height:100%;object-fit:contain;animation:splash 1.2s var(--ease) both}
+#splash .e:before,#splash .e:after{content:"";position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(195,199,154,.5);animation:ring 2s ease-out infinite}
+#splash .e:after{animation-delay:1s}
+@keyframes splash{from{opacity:0;transform:scale(.6) rotate(-12deg);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+@keyframes ring{from{transform:scale(.9);opacity:.8}to{transform:scale(1.5);opacity:0}}
+#splash .wm{font-size:44px;display:flex;gap:4px}
+#splash .wm span{animation:up .6s var(--ease) both}
+#splash .ld{width:160px;height:3px;border-radius:3px;background:#2A2E22;overflow:hidden}#splash .ld i{display:block;height:100%;width:100%;background:var(--ye);transform-origin:left;animation:load 2s var(--ease) both}
+@keyframes load{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* map */
+.mapbox{position:relative;border-radius:18px;border:1px solid var(--ln);background:radial-gradient(circle at 50% 40%,#1C2015,#0E100B);overflow:hidden;padding:6px}
+.mapbox svg{display:block;width:100%;height:auto}
+.ua{fill:rgba(195,199,154,.1);stroke:var(--ac);stroke-width:1.4;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.2s ease-out forwards,fillin 1s 1.6s both}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes fillin{from{fill:rgba(195,199,154,0)}}
+.scan{stroke:rgba(242,194,48,.5);stroke-width:1;animation:scan 4s linear infinite}
+@keyframes scan{from{transform:translateX(0)}to{transform:translateX(360px)}}
+.pin{cursor:pointer;transform-box:fill-box;transform-origin:center;animation:pop .5s var(--ease) backwards}
+.pin .pulse{fill:none;stroke:var(--ye);stroke-width:1;transform-box:fill-box;transform-origin:center;animation:pulse 2s ease-out infinite}
+@keyframes pulse{from{transform:scale(1);opacity:.9}to{transform:scale(3.4);opacity:0}}
+.pin .dot{fill:var(--ye);stroke:#14110A;stroke-width:1;transition:r .2s}
+.pin.sel .dot{fill:#fff}
+.pin:focus{outline:none}.pin:focus-visible .dot{stroke:#fff;stroke-width:2}
+.pin text{font:600 9px Inter,sans-serif;fill:var(--tx);paint-order:stroke;stroke:#0E100B;stroke-width:2.5px}
+/* candle */
+.candle{width:44px;height:84px;position:relative;margin:0 auto}
+.candle .w{position:absolute;bottom:0;left:8px;width:28px;height:50px;border-radius:5px;background:linear-gradient(90deg,#CFC9B4,#F3EFE0 50%,#BDB7A2)}
+.candle .f{position:absolute;bottom:52px;left:13px;width:18px;height:30px;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;background:radial-gradient(circle at 50% 70%,#fff 0 18%,#FFD76A 40%,#F28A1E 75%,transparent 80%);transform-origin:50% 100%;animation:flame 1.1s ease-in-out infinite alternate;filter:drop-shadow(0 0 14px rgba(255,180,60,.8));opacity:0;transition:opacity .6s}
+.candle.lit .f{opacity:1}
+@keyframes flame{0%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.06,.94) rotate(2deg)}100%{transform:scale(.96,1.08) rotate(-1deg)}}
+/* games */
+.hud{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.hearts span{color:var(--bad);font-size:20px;transition:opacity .3s,transform .3s;display:inline-block}.hearts span.off{opacity:.2;transform:scale(.7)}
+.deck{position:relative;height:300px;touch-action:pan-y}
+.scard{position:absolute;inset:0;border-radius:22px;border:1px solid var(--ln);background:linear-gradient(160deg,#252A1C,#14160F);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;box-shadow:0 20px 40px -18px #000;user-select:none;-webkit-user-select:none;touch-action:none;cursor:grab;animation:pop .4s var(--ease)}
+.scard .emo{font-size:84px;line-height:1}
+.scard .tag{position:absolute;top:16px;padding:6px 10px;border-radius:10px;font-weight:700;font-size:13px;opacity:0;border:2px solid}
+.scard .tag.l{left:16px;color:var(--bad);transform:rotate(-10deg)}.scard .tag.r{right:16px;color:var(--ok);transform:rotate(10deg)}
+.scard.fly{transition:transform .45s ease-in,opacity .45s}
+.toast{min-height:48px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600;border-radius:12px;padding:8px 12px}
+.toast.ok{background:#1B2A1C;color:#B9E6BB;animation:pop .3s}.toast.no{background:#2C1B18;color:#F6B9AD;animation:shake .35s}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.item{flex-direction:column;min-height:92px;gap:4px;font-size:12.5px;font-weight:500;padding:8px;border-radius:16px;animation:pop .4s var(--ease) backwards}
+.item .e{font-size:30px;line-height:1}
+.item.packed{pointer-events:none;transform:translateY(60px) scale(.2);opacity:0;transition:transform .5s var(--ease),opacity .5s}
+.item.no{animation:shake .35s;border-color:var(--bad)}
+.bag{font-size:46px;line-height:1;display:inline-block}.bag.b{animation:bump .35s}
+.mem{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;perspective:900px}
+.mc{position:relative;min-height:88px;padding:0;border:0;background:transparent;transform-style:preserve-3d;transition:transform .5s var(--ease)}
+.mc.fl{transform:rotateY(180deg)}
+.mc i{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-style:normal;padding:6px;border:1px solid var(--ln)}
+.mc .fr{background:linear-gradient(160deg,#2A2F1F,#171A12);color:var(--ac);font-family:'Ruslan Display',serif;font-size:26px}
+.mc .bk{background:var(--sf2);transform:rotateY(180deg);font-size:12.5px;font-weight:600;line-height:1.2}
+.mc .bk.num{font-family:Oswald,sans-serif;font-size:28px;color:var(--ye)}
+.mc.done .bk{border-color:var(--ok);background:#1B2A1C;animation:bump .4s}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:fall 2.2s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+.big{font-size:60px;text-align:center;animation:pop .6s var(--ease)}
+.steps{display:flex;gap:6px}.steps i{flex:1;height:5px;border-radius:5px;background:var(--sf2);overflow:hidden;position:relative}.steps i:after{content:"";position:absolute;inset:0;background:var(--ye);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}.steps i.on:after{transform:scaleX(1)}
+.check{width:88px;height:88px;margin:0 auto;display:block}.check circle{fill:none;stroke:var(--ok);stroke-width:4;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .7s ease-out forwards}.check path{fill:none;stroke:var(--ok);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s .6s ease-out forwards}
+.num{width:32px;height:32px;border-radius:50%;background:var(--sf2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;color:var(--ye);flex:none}
+
+/* v3 */
+#app{background-image:repeating-radial-gradient(circle at 85% -5%,rgba(195,199,154,.045) 0 1px,transparent 1px 16px);background-repeat:no-repeat;background-size:100% 420px}
+.hero,.idc{background-image:repeating-radial-gradient(circle at 90% 10%,rgba(195,199,154,.08) 0 1px,transparent 1px 13px),linear-gradient(135deg,#262B1D,#12140E)}
+.tile svg{width:42px;height:42px;padding:8px;border-radius:13px;background:rgba(242,194,48,.1);border:1px solid rgba(242,194,48,.28);transition:transform .4s var(--ease)}
+.tile:active svg{transform:rotate(-8deg) scale(1.1)}
+.sosb{border-color:var(--bad);color:#F6B9AD;background:rgba(238,141,124,.08);justify-content:flex-start}
+.idc{border:1px solid rgba(242,194,48,.4);border-radius:18px;padding:16px;position:relative;overflow:hidden;box-shadow:0 18px 40px -22px rgba(242,194,48,.5)}
+.idc:before{content:"";position:absolute;top:0;bottom:0;width:60px;left:-80px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.12),transparent);animation:shine 4.5s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-80px}100%{left:120%}}
+.idc>*{position:relative}
+/* candle */
+.cdl{position:relative;width:140px;height:200px;margin:0 auto}
+.cdl .wax{position:absolute;bottom:0;left:43px;width:54px;height:112px;border-radius:9px 9px 6px 6px/12px 12px 6px 6px;background:linear-gradient(90deg,#8E8870,#E9E3CE 30%,#FFFDF3 48%,#DAD4BD 68%,#847E67);box-shadow:inset 0 -22px 26px -12px rgba(0,0,0,.55),0 10px 18px -8px #000;transition:box-shadow .8s}
+.cdl .wax:before{content:"";position:absolute;top:-7px;left:0;right:0;height:16px;border-radius:50%;background:radial-gradient(ellipse at 50% 60%,#FFF8E0,#CFC7A8 80%)}
+.cdl .wax:after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 50% 0,rgba(255,170,70,.75),transparent 62%);opacity:0;transition:opacity .9s}
+.cdl.lit .wax:after{opacity:1}
+.cdl .wax i{position:absolute;top:4px;width:7px;border-radius:0 0 5px 5px;background:linear-gradient(90deg,#F6F1DE,#D5CFB8)}
+.cdl .wax i:nth-child(1){left:7px;height:30px}.cdl .wax i:nth-child(2){right:11px;height:19px;width:6px}
+.cdl .wick{position:absolute;left:50%;bottom:112px;width:3px;height:15px;margin-left:-1.5px;border-radius:2px;background:linear-gradient(#1b140f,#4a3524);transform:rotate(4deg);transform-origin:bottom}
+.cdl.lit .wick{background:linear-gradient(#ff9a3c,#1b140f 55%)}
+.cdl .fw{position:absolute;left:50%;bottom:121px;width:30px;height:70px;margin-left:-15px;transform:scale(0);transform-origin:50% 100%;opacity:0;transition:transform .7s var(--ease),opacity .4s}
+.cdl.lit .fw{transform:scale(1);opacity:1}
+.cdl .flame{position:absolute;inset:0;transform-origin:50% 100%;border-radius:50% 50% 50% 50%/70% 70% 30% 30%;background:radial-gradient(ellipse 34% 16% at 50% 92%,rgba(70,130,255,.95),transparent 100%),radial-gradient(ellipse 30% 42% at 50% 62%,#fff 0 45%,transparent 100%),radial-gradient(ellipse 60% 62% at 50% 60%,#FFE79A 0 30%,#FFB534 58%,rgba(255,112,24,.85) 82%,transparent 100%);filter:blur(.5px) drop-shadow(0 0 16px rgba(255,170,60,.95));animation:fl1 3.1s ease-in-out infinite,fl2 .23s ease-in-out infinite alternate}
+@keyframes fl1{0%{transform:rotate(-2deg) scaleY(1)}22%{transform:rotate(2.5deg) scaleY(1.07)}45%{transform:rotate(-1deg) scaleY(.95)}63%{transform:rotate(3deg) scaleY(1.04) skewX(2deg)}82%{transform:rotate(-3deg) scaleY(1.09) skewX(-2deg)}100%{transform:rotate(-2deg) scaleY(1)}}
+@keyframes fl2{from{opacity:.93}to{opacity:1}}
+.cdl .glow{position:absolute;left:50%;bottom:86px;width:220px;height:220px;margin-left:-110px;border-radius:50%;background:radial-gradient(circle,rgba(255,176,66,.42),rgba(255,140,40,.12) 45%,transparent 68%);opacity:0;transition:opacity .9s;animation:glw 2.3s ease-in-out infinite alternate;pointer-events:none}
+.cdl.lit .glow{opacity:1}
+@keyframes glw{from{transform:scale(.94)}to{transform:scale(1.06)}}
+.cdl .smoke{position:absolute;left:50%;bottom:128px;width:10px;height:44px;margin-left:-5px;border-radius:50%;background:linear-gradient(transparent,rgba(210,210,200,.5));filter:blur(4px);opacity:0}
+.cdl.out .smoke{animation:smk 1.8s ease-out}
+@keyframes smk{0%{opacity:.8;transform:translateY(0) scaleX(1)}100%{opacity:0;transform:translateY(-70px) scaleX(2.6) rotate(12deg)}}
+.card:has(.cdl){overflow:hidden;transition:background 1s,border-color 1s}
+.card:has(.cdl.lit){background:radial-gradient(90% 70% at 50% 30%,rgba(255,150,50,.2),#141610 75%);border-color:rgba(255,170,70,.45)}
+/* merch */
+.prod{padding:10px;gap:8px}.prod svg{display:block;width:100%;height:auto;border-radius:12px;background:radial-gradient(circle at 50% 40%,#2A2F1F,#12140E)}
+.prod .sz{display:flex;gap:4px}.prod .sz button{min-height:32px;min-width:0;flex:1;padding:0;font-size:12px;border-radius:8px}.prod .sz button.on{background:var(--ac);color:#14110A;border-color:var(--ac)}
+.prod .add{min-height:42px;font-size:13.5px}
+.cartn{display:inline-flex;min-width:24px;height:24px;border-radius:12px;background:var(--ye);color:#14110A;align-items:center;justify-content:center;font-size:13px;padding:0 6px}.cartn.b{animation:bump .35s}
+.lnk{padding:12px 14px;justify-content:flex-start;text-align:left;font-weight:400}.lnk b{display:block}
+.lnk .bi{width:44px;height:44px;border-radius:13px;background:rgba(195,199,154,.1);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--ye);flex:none}
+.tel{flex-direction:column;gap:0;min-height:76px}.tel b{font-family:Oswald,sans-serif;font-size:28px;color:var(--ye);line-height:1.1}.tel span{font-size:12.5px;color:var(--mu);font-weight:400}
+details{border:1px solid var(--ln);border-radius:14px;background:var(--sf);padding:0 14px}details summary{min-height:52px;display:flex;align-items:center;font-weight:600;cursor:pointer;list-style:none}details summary::-webkit-details-marker{display:none}details summary:after{content:"+";margin-left:auto;color:var(--ye);font-size:20px;transition:transform .3s}details[open] summary:after{transform:rotate(45deg)}details ul{padding-bottom:12px}
+.lamp{width:96px;height:96px;border-radius:50%;margin:0 auto;background:radial-gradient(circle,#3a3d30,#191b13);border:2px solid var(--ln);transition:all .07s}
+.lamp.on{background:radial-gradient(circle,#fff,#F2C230 55%,#b58a12);box-shadow:0 0 60px 14px rgba(242,194,48,.55);border-color:#fff}
+.mcode{font-family:Oswald,sans-serif;font-size:44px;letter-spacing:10px;text-align:center;color:var(--ac);line-height:1}
+.mo{font-family:Oswald,sans-serif;font-size:26px;min-height:64px}
+.mtab{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:13px;padding-bottom:12px}
+
+/* v4 */
+.cmd{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:start}
+.cmd .pf{position:relative;width:96px;height:120px;border-radius:14px;overflow:hidden;border:1px solid rgba(242,194,48,.45);background:linear-gradient(160deg,#2A2F1F,#12140E);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mu);font-size:11px}
+.cmd .pf img{width:100%;height:100%;object-fit:cover;display:block;animation:pop .5s var(--ease)}
+.cmd .pf label{position:absolute;inset:0;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--mu);font-size:11px}
+.cmd .pf input{position:absolute;width:1px;height:1px;opacity:0}
+.cmd .pf.has label{opacity:0}
+.rk{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ye);font-weight:600}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.facts div{background:rgba(195,199,154,.06);border:1px solid var(--ln);border-radius:12px;padding:10px}.facts b{display:block;font-family:Oswald,sans-serif;font-size:22px;color:var(--ye);line-height:1.1}.facts span{font-size:11.5px;color:var(--mu)}
+.tl{position:relative;padding-left:22px}
+.tl:before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--ye),var(--ac) 60%,transparent);transform-origin:top;animation:grow 1.4s var(--ease) both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.tl .ev{position:relative;padding:0 0 16px}.tl .ev:last-child{padding-bottom:0}
+.tl .ev:before{content:"";position:absolute;left:-21px;top:5px;width:12px;height:12px;border-radius:50%;background:#0A0B09;border:2px solid var(--ye);box-shadow:0 0 0 4px rgba(242,194,48,.12)}
+.tl .ev b{font-family:Oswald,sans-serif;color:var(--ye);font-size:15px;display:block}
+.tl .ev{opacity:0;animation:up .5s var(--ease) forwards}
+.lb{display:flex;flex-direction:column;gap:8px}
+.lbr{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--sf);border:1px solid var(--ln);animation:up .4s var(--ease) backwards}
+.lbr.me{border-color:var(--ye);background:linear-gradient(90deg,rgba(242,194,48,.14),var(--sf))}
+.lbr .pl{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-weight:600;background:var(--sf2);color:var(--ac)}
+.lbr:nth-child(1) .pl{background:linear-gradient(160deg,#FFE27A,#C99A12);color:#14110A}
+.lbr:nth-child(2) .pl{background:linear-gradient(160deg,#E9E9E2,#9DA096);color:#14110A}
+.lbr:nth-child(3) .pl{background:linear-gradient(160deg,#E6A36A,#9A5A2A);color:#14110A}
+.lbr b{display:block}.lbr .xp{font-family:Oswald,sans-serif;font-size:18px;color:var(--ye)}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.sw{position:relative;width:52px;height:30px;flex:none;border-radius:15px;background:var(--sf2);border:1px solid var(--ln);padding:0;min-height:0}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--mu);transition:transform .3s var(--ease),background .3s}
+.sw[aria-checked=true]{background:rgba(242,194,48,.25);border-color:var(--ye)}.sw[aria-checked=true]:after{transform:translateX(22px);background:var(--ye)}
+#map3d{min-height:330px}
+
+/* v7 projects */
+.pj{position:relative;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:10px}
+.pj:before{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(242,194,48,.14),transparent 65%);pointer-events:none}
+.pj .hd{display:flex;align-items:center;gap:14px}
+.pj .ring{position:relative;width:60px;height:60px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ye);background:radial-gradient(circle,#2a2f1f,#14160f)}
+.pj .ring:before{content:"";position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(var(--ye),transparent 30%,var(--ac) 55%,transparent 80%,var(--ye));-webkit-mask:radial-gradient(circle,transparent 62%,#000 64%);mask:radial-gradient(circle,transparent 62%,#000 64%);animation:spin 6s linear infinite}
+.pj .ring svg{width:30px;height:30px}
+.pj .tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ac)}
+.pj .acts{display:flex;flex-wrap:wrap;gap:8px}.pj .acts .btn{min-height:42px;font-size:13.5px}
+.pjhero{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.xcard{background:linear-gradient(135deg,#2A1E12,#12100C);border:1px solid rgba(238,141,124,.4)}
+.xcard .rk{color:#F2A88F}
+
+/* v6 diploma */
+.dprev{position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(242,194,48,.45);background:#0E100B;min-height:150px;display:flex;align-items:center;justify-content:center}
+.dprev img{display:block;width:100%;height:auto;animation:pop .6s var(--ease)}
+.dprev .sp{width:34px;height:34px;border-radius:50%;border:3px solid var(--ln);border-top-color:var(--ye);animation:spin 1s linear infinite}
+.vid{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;padding:12px;text-align:left;font-weight:400;justify-content:stretch}
+.vid .th{width:72px;height:72px;border-radius:12px;background:radial-gradient(circle,#2f3424,#14160f);display:flex;align-items:center;justify-content:center;color:var(--ye);border:1px solid var(--ln)}
+
+.socs{display:flex;flex-direction:column;gap:6px}
+.soc{display:grid;grid-template-columns:36px 1fr 18px;gap:10px;align-items:center;padding:8px 10px;min-height:52px;border-radius:12px;border:1px solid var(--ln);background:rgba(0,0,0,.25);text-decoration:none;color:var(--tx);transition:transform .15s var(--ease),border-color .2s}
+.soc:active{transform:scale(.97)}.soc:hover{border-color:rgba(242,194,48,.5)}
+.soc .si{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff}
+.soc .si svg{width:20px;height:20px}
+.soc .si.ig{background:linear-gradient(45deg,#F2A541,#D9346B 55%,#7C3AC9)}.soc .si.tg{background:#2A9BD8}.soc .si.yt{background:#D93A2B}.soc .si.fb{background:#2F64C8}.soc .si.web{background:#3A3F31;color:var(--ye)}
+.soc b{display:block;font-size:13.5px}.soc span.sm{font-size:12px}
+.soc>svg{color:var(--mu);width:16px;height:16px}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="splash" role="status" aria-label="Завантаження застосунку Артан">
+<div class="e"><img src="img/emblem.png" alt=""></div>
+<div class="wm" aria-hidden="true"><span style="animation-delay:.5s">А</span><span style="animation-delay:.6s">Р</span><span style="animation-delay:.7s">Т</span><span style="animation-delay:.8s">А</span><span style="animation-delay:.9s">Н</span></div>
+<div class="ld"><i></i></div>
+</div>
+<div id="app"></div>
+<script src="js/map3d.js"></script>
+<script src="js/diploma.js"></script>
+<nav aria-label="Розділи"><div class="in"><span class="pill" id="pill"></span>
+<a href="#home" data-tab="home"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Головна</a>
+<a href="#unit" data-tab="unit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Підрозділ</a>
+<a href="#map" data-tab="map"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.200 7-11a7 7 0 0 0-14 0c0 4.800 7 11 7 11z"/><circle cx="12" cy="10" r="2.500"/></svg>Карта</a>
+<a href="#school" data-tab="school"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.500-3.200 7.800-8 9-4.800-1.200-8-4.500-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Школа</a>
+<a href="#more" data-tab="more"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.500" height="6.500" rx="1.800"/><rect x="13.500" y="4" width="6.500" height="6.500" rx="1.800"/><rect x="4" y="13.500" width="6.500" height="6.500" rx="1.800"/><rect x="13.500" y="13.500" width="6.500" height="6.500" rx="1.800"/></svg>Більше</a>
+</div></nav>
+<script>
+(function(){
+var KEY='artan-test-v2';/* v3 */
+var S={xp:0,done:{},age:null,candle:false,daily:'',streak:0,call:'',city:'',lbOn:false};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);for(var k in o)S[k]=o[k];}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}if(typeof lbSync==='function')lbSync();}
+var app=document.getElementById('app'),photos={},timers=[];
+var ui={op:null,seg:'ops',mission:null,q:0,ans:null,score:0,game:null,car:0,space:null,zf:{step:0,d:{}},ss:'learn',lbf:'all',cart:[],msize:{},cartOpen:false,cartMsg:false};
+function $(s,r){return (r||document).querySelector(s);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function later(fn,ms){var t=setTimeout(fn,ms);timers.push(['t',t]);return t;}
+function every(fn,ms){var t=setInterval(fn,ms);timers.push(['i',t]);return t;}
+function clearTimers(){timers.forEach(function(t){if(t[0]==='t')clearTimeout(t[1]);else clearInterval(t[1]);});timers=[];}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function icon(p){return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';}
+var F=' fill="currentColor" fill-opacity=".2"';var I={ops:'<circle cx="12" cy="12" r="7"'+F+'/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',mem:'<path d="M12 2c2 2.500 2.500 4 1.500 5.500a2 2 0 0 1-3 0C9.500 6 10 4.500 12 2z" fill="currentColor"/><rect x="8" y="10.500" width="8" height="11" rx="1.500"'+F+'/>',map:'<path d="M12 21s7-6.200 7-11a7 7 0 0 0-14 0c0 4.800 7 11 7 11z"'+F+'/><circle cx="12" cy="10" r="2.500"/>',sch:'<path d="M12 3l8 3v6c0 4.500-3.200 7.800-8 9-4.800-1.200-8-4.500-8-9V6z"'+F+'/><path d="M9 12l2 2 4-4"/>',arr:'<path d="M5 12h14M13 6l6 6-6 6"/>',nav:'<path d="M3 11l18-8-8 18-2-8z"/>',
+tee:'<path d="M8 3l4 2 4-2 5 4-3 3-2-1v11H8V9l-2 1-3-3z"'+F+'/>',soc:'<path d="M3 10v4h3l8 4V6L6 10z"'+F+'/><path d="M17.500 9a4 4 0 0 1 0 6"/>',sos:'<path d="M6 18v-5a6 6 0 0 1 12 0v5z"'+F+'/><path d="M4 18h16M12 3v2M4.500 6l1.500 1.500M19.500 6L18 7.500"/>',flag:'<path d="M5 4h12l-2.500 4L17 12H5z"'+F+'/><path d="M5 21V4"/>',
+cam:'<rect x="3" y="3" width="18" height="18" rx="5"'+F+'/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".8" fill="currentColor"/>',pln:'<path d="M21 4L3 11l6 2 2 6 3-4 4 3z"'+F+'/>',ply:'<rect x="3" y="5" width="18" height="14" rx="4"'+F+'/><path d="M10 9l5 3-5 3z" fill="currentColor"/>',ppl:'<circle cx="9" cy="8" r="3.500"'+F+'/><path d="M2.500 20c.5-4 3-6 6.500-6s6 2 6.500 6"/><circle cx="17.500" cy="9" r="2.500"/><path d="M17 14c2.500 0 4 1.500 4.500 4"/>',web:'<circle cx="12" cy="12" r="9"'+F+'/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',info:'<circle cx="12" cy="12" r="9"'+F+'/><path d="M12 11v6M12 7.500v.5"/>'};
+
+var OPS=[
+{id:'boyko',d:'СЕР<br>2023',t:'Бій біля «вишок Бойка»',s:'Катери проти російського літака в Чорному морі.',x:'Група на швидкісних човнах зіткнулася з російським бойовим літаком поблизу острова Зміїний. За повідомленням ГУР, борт противника пошкоджено, серед українських бійців втрат немає.',src:'Українська правда, ГУР МО'},
+{id:'crimea',d:'24 СЕР<br>2023',t:'Висадка в Криму',s:'Нічна операція до Дня Незалежності.',x:'У ніч на 24 серпня розвідники за підтримки ВМС висадилися на окупованому півострові, виконали завдання і повернулися без втрат.',src:'ГУР МО, 24 Канал'},
+{id:'kosy',d:'ЖОВ<br>2023',t:'Західний Крим і коси',s:'Висадка на узбережжі та двох косах.',x:'Спецпризначенці висадилися на західному узбережжі Криму, а також на Тендрівській і Кінбурнській косах, де вступили в бій з окупантами.',src:'АрміяInform, ГУР МО'},
+{id:'storm',d:'КВІ<br>2025',t:'Відбитий масований штурм',s:'Шість ворожих колон зупинено.',x:'Противник кинув у наступ кілька сотень людей і десятки бронемашин. Оператори FPV та артилерія підрозділу уразили 15 одиниць техніки ще на підході.',src:'АрміяInform, ГУР МО'},
+{id:'step',d:'КВІ<br>2026',t:'Степногірськ',s:'Комплексна операція на Запорізькому напрямку.',x:'Разом з іншими підрозділами Сил оборони бійці ведуть зачистку Степногірська: уражено понад 20 одиниць бронетехніки, взято полонених.',src:'АрміяInform, ГУР МО'}
+];
+var SPACES=[
+{c:'Київ',lon:30.52,lat:50.45},{c:'Вінниця',lon:28.47,lat:49.23},{c:'Львів',lon:24.03,lat:49.84},{c:'Одеса',lon:30.73,lat:46.48},{c:'Черкаси',lon:32.06,lat:49.44},{c:'Івано-Франківськ',lon:24.71,lat:48.92},{c:'Чернівці',lon:25.94,lat:48.29},{c:'Ніжин',lon:31.89,lat:51.05},{c:'Полтава',lon:34.55,lat:49.59}
+];
+var UA=[[22.15,48.4],[22.6,49.1],[22.7,49.55],[23.6,50.35],[24.1,50.6],[24.0,50.85],[23.65,51.5],[23.6,51.62],[24.3,51.75],[25.3,51.95],[26.5,51.85],[27.5,51.6],[28.6,51.5],[29.3,51.4],[30.2,51.5],[30.55,51.28],[30.95,52.05],[31.8,52.1],[32.4,52.3],[33.2,52.37],[33.85,52.3],[34.4,51.8],[34.3,51.25],[35.1,51.2],[35.6,50.4],[36.3,50.3],[37.5,50.4],[38.0,49.95],[39.2,49.85],[40.1,49.6],[40.2,49.25],[39.7,48.6],[39.95,48.3],[39.8,47.85],[38.85,47.85],[38.2,47.1],[37.55,47.07],[36.8,46.75],[35.9,46.6],[35.35,46.35],[34.85,46.15],[35.0,45.7],[35.5,45.3],[36.6,45.42],[36.45,45.05],[35.4,45.0],[34.4,44.75],[33.75,44.4],[33.4,44.6],[33.55,45.1],[32.5,45.35],[33.0,45.75],[33.65,46.1],[32.9,46.1],[31.8,46.3],[32.0,46.6],[31.55,46.6],[30.75,46.5],[30.5,46.1],[29.75,45.6],[29.65,45.2],[28.2,45.45],[28.5,45.75],[28.95,46.1],[29.6,46.4],[30.15,46.4],[29.9,46.8],[29.55,47.35],[29.2,47.9],[28.9,48.0],[28.2,48.2],[27.5,48.45],[26.6,48.25],[26.2,47.98],[25.2,47.9],[24.9,47.72],[24.2,47.9],[23.2,48.1],[22.9,48.0]];
+function px(lon){return ((lon-21.8)*0.663*29+6).toFixed(1);}function py(lat){return ((52.6-lat)*29+4).toFixed(1);}
+
+var HIST=[
+['Червень 2022','Створення в Києві. Спочатку рота зі 112 бійців-добровольців.'],
+['2022','Бої за Київ, Бахмут і Енергодар. Фінальний етап боротьби за острів Зміїний.'],
+['Серпень–жовтень 2023','Повернення «вишок Бойка», висадки в Криму, на Тендрівській і Кінбурнській косах.'],
+['Жовтень 2023','Оборона на Куп\'янському напрямку.'],
+['2024','Бої біля Часового Яру та на Харківщині. Створено штурмовий підрозділ «Артан Х».'],
+['2025','Відкриті простори в містах України, поштова марка Укрпошти.'],
+['2026','Операція в районі Степногірська. Наземні дрони за літо евакуювали 45 поранених.']];
+var MISSIONS=[
+{id:'alarm',min:6,t:'Повітряна тривога',tips:['Почув сирену — одразу йди в укриття, не чекай.','Немає укриття — стань за двома стінами, подалі від вікон.','Виходь лише після сигналу відбою.'],q:[
+['Що робити, коли лунає сирена?',['Одразу йти в укриття','Дивитися у вікно','Знімати відео'],0],
+['Укриття далеко. Де вдома безпечніше?',['Біля вікна','За двома стінами, далі від вікон','На балконі'],1],
+['Коли можна вийти з укриття?',['Коли стало нудно','Коли стихло','Після сигналу відбою'],2]]},
+{id:'mine',min:6,t:'Мінна безпека',tips:['Невідомий предмет: не підходь, не чіпай, не кидай у нього нічого.','Відходь тим самим шляхом, яким прийшов.','Розкажи дорослим і зателефонуйте 101 або 112.'],q:[
+['Ти побачив у траві дивний металевий предмет. Що робиш?',['Підніму роздивитися','Не чіпаю, відходжу і кажу дорослим','Штовхну палицею'],1],
+['Як правильно відійти від небезпечної знахідки?',['Тим самим шляхом, яким прийшов','Навпростець через кущі','Бігом у будь-який бік'],0],
+['Куди телефонувати про підозрілий предмет?',['Другові','Нікуди','101 або 112'],2]]},
+{id:'aid',min:10,t:'Перша допомога',tips:['Спершу переконайся, що тобі самому безпечно.','Клич дорослих і телефонуй 103 або 112.','Сильна кровотеча: щільно притисни рану чистою тканиною і не відпускай.'],q:[
+['Що перевіряємо найперше?',['Чи безпечно мені самому','Що в кишенях потерпілого','Котра година'],0],
+['Номер швидкої допомоги в Україні?',['101','103','104'],1],
+['З рани сильно тече кров. Твоя дія?',['Чекати, поки мине','Полити водою і піти','Щільно притиснути рану і кликати на допомогу'],2]]},
+{id:'cyber',min:10,t:'Кібербезпека',tips:['Незнайомець пропонує гроші за «просте завдання» — це може бути ворог. Не відповідай.','Не публікуй фото військових, блокпостів і місць прильотів.','Про все дивне розкажи батькам.'],q:[
+['Незнайомець у месенджері обіцяє гроші за фото будівлі. Що робиш?',['Сфотографую, це ж легко','Не відповідаю і кажу батькам','Попрошу більше грошей'],1],
+['Чи можна викладати відео роботи ППО?',['Ні, це допомагає ворогу','Так, якщо гарне','Так, але без звуку'],0],
+['Кому можна сказати свій пароль?',['Найкращому другові','Тому, хто попросить у чаті','Тільки батькам'],2]]},
+{id:'topo',min:14,t:'Орієнтування',tips:['Намагнічений кінець стрілки компаса показує на північ.','Опівдні сонце в Україні стоїть на півдні.','Масштаб 1:50 000 означає: 1 см на карті — це 500 м на місцевості.'],q:[
+['Куди показує намагнічений кінець стрілки компаса?',['На схід','На північ','На сонце'],1],
+['Де в Україні сонце опівдні?',['На півдні','На півночі','На заході'],0],
+['Масштаб 1:50 000. Скільки метрів в 1 см карти?',['50 м','5 км','500 м'],2]]}
+];
+var AGES=[{a:6,n:'6–9 років',r:'Джура'},{a:10,n:'10–13 років',r:'Розвідник'},{a:14,n:'14–17 років',r:'Захисник'}];
+var RANKS=[[0,'Новобранець'],[40,'Джура'],[90,'Розвідник'],[150,'Захисник'],[220,'Майстер безпеки']];
+function rank(){var r=RANKS[0],n=null;for(var i=0;i<RANKS.length;i++)if(S.xp>=RANKS[i][0]){r=RANKS[i];n=RANKS[i+1]||null;}return{name:r[1],base:r[0],next:n};}
+function award(id,pts){var g=S.done[id]?Math.round(pts/5):pts;S.xp+=g;if(pts>0)S.done[id]=true;save();return g;}
+var PACK=[['💧','Вода',1],['🎮','Приставка',0],['🔦','Ліхтарик',1],['📄','Документи',1],['📺','Телевізор',0],['🩹','Аптечка',1],['🔋','Павербанк',1],['🛹','Скейт',0],['🍫','Їжа на день',1],['🧥','Теплий одяг',1],['🏺','Ваза',0],['📻','Радіо',1]];
+var TOUCH=[['⚽','Твій м\'яч у дворі',1],['📦','Коробка з дротами біля під\'їзду',0],['🎒','Твій шкільний рюкзак',1],['🧸','Чужа іграшка на узбіччі',0],['🔩','Металевий предмет у лісі',0],['🥤','Твоя пляшка з водою',1],['📱','Телефон без господаря на лавці',0],['🛩️','Уламок дрона на полі',0],['🖊️','Яскрава ручка на дорозі',0],['🚲','Твій велосипед',1]];
+var PAIRS=[['101','Пожежа, рятувальники'],['102','Поліція'],['103','Швидка допомога'],['104','Запах газу'],['112','Єдиний екстрений номер'],['🚨','Сирена: йду в укриття']];
+
+function bar(r){var p=r.next?Math.round((S.xp-r.base)/(r.next[0]-r.base)*100):100;return '<div class="bar" role="img" aria-label="Прогрес до наступного звання '+p+'%"><i style="width:0" data-w="'+p+'"></i></div><p class="sm mu">'+(r.next?'До звання «'+r.next[1]+'» ще '+(r.next[0]-S.xp)+' балів':'Найвище звання здобуто')+'</p>';}
+function silence(){var n=new Date(),t=new Date(n);t.setHours(9,0,0,0);if(n>=t)t.setDate(t.getDate()+1);var m=Math.round((t-n)/60000);return Math.floor(m/60)+' год '+(m%60)+' хв';}
+function confetti(){var c=document.createElement('div');c.className='confetti';c.setAttribute('aria-hidden','true');var col=['#F2C230','#C3C79A','#7BC47F','#EDEBE2'];for(var i=0;i<34;i++){var p=document.createElement('i');p.style.left=(Math.random()*100)+'%';p.style.background=col[i%4];p.style.animationDelay=(Math.random()*.5)+'s';p.style.animationDuration=(1.6+Math.random()*1.2)+'s';c.appendChild(p);}document.body.appendChild(c);setTimeout(function(){c.remove();},3200);}
+
+/* ---------- HOME ---------- */
+function vHome(){var r=rank(),h=new Date().getHours(),gr=h<5?'Доброї ночі':h<12?'Доброго ранку':h<18?'Доброго дня':'Доброго вечора',dd=S.daily===today();
+return '<header class="top row sb"><div class="row"><img class="em" src="img/emblem.png" alt="Емблема спецпідрозділу «Артан»"><div><div class="wm" style="font-size:30px">АРТАН</div><p class="sm mu">'+gr+(S.call?', «'+esc(S.call)+'»':'')+'! Спецпідрозділ ГУР МО України</p></div></div></header>'+
+'<div class="hero stack"><p class="ey">Найближчий вишкіл</p><h2>«Звитяга» · [ДАТА] · [ОБЛАСТЬ]</h2><p class="sm mu">П\'ять днів з інструкторами: такмед, дрони, топографія. Для молоді 13–20 років.</p><a class="btn pri" href="#zvytiaha" data-act="zstart" style="align-self:flex-start">Подати заявку '+icon(I.arr)+'</a></div>'+
+'<div class="grid2">'+tile('unit',I.ops,'Спецоперації','Історії та фото','ops')+tile('unit',I.mem,'Стіна пам\'яті','Полеглі воїни','mem')+tile('map',I.map,'Простори «Артан»','3D-карта міст')+tile('school',I.sch,'Школа захисника','Місії та ігри')+tile('projects',I.ppl,'Проєкти','Простори, мотоклуб, турніри')+tile('diploma',I.sch,'Диплом','Для юних захисників')+tile('merch',I.tee,'Мерч','Одяг і символіка')+tile('social',I.soc,'Соцмережі','Сторінки та проєкти')+'</div>'+
+'<a class="btn sosb" href="#sos">'+icon(I.sos)+'SOS-пам\'ятка: що робити в небезпеці</a>'+
+'<div class="card stack"><p class="ey">Про підрозділ</p><h2>Знаємо. Знаходимо. Знищуємо.</h2><p class="sm mu">Підрозділ активних дій ГУР МО України. Створений 1 червня 2022 року в Києві офіцерами воєнної розвідки та добровольцями. Назву взято від легендарного племені артанів, яке, за переказами, не пускало чужинців на свою землю.</p>'+
+'<div class="facts"><div><b>2022</b><span>рік створення</span></div><div><b>112</b><span>бійців на старті</span></div><div><b>13+</b><span>просторів</span></div></div></div>'+
+'<div class="card stack"><p class="ey">Командир</p><div class="cmd"><div class="pf'+(photos.cmd_titan?' has':'')+'">'+(photos.cmd_titan?'<img src="'+photos.cmd_titan+'" alt="Віктор Торкотюк «Титан»">':'')+'<label for="cmdph">'+icon(I.cam)+'Додати фото</label><input id="cmdph" type="file" accept="image/*" data-op="cmd_titan"></div>'+
+'<div class="stack" style="gap:6px"><h2>Віктор Торкотюк</h2><span class="rk">позивний «Титан» · полковник</span><p class="sm mu">Командує «Артаном» з моменту створення у 2022 році. Воює з 2014-го. На початку вторгнення очолював невелику групу, обороняв Київ навесні 2022-го, брав участь у звільненні «вишок Бойка».</p></div></div>'+
+'<div class="wrap"><span class="badge">Орден «За мужність» I, II, III ст.</span></div>'+
+'</div>'+
+'<div class="card stack xcard"><p class="ey" style="color:#F2A88F">Підрозділ «Артан Х» у складі «Артану»</p><div class="cmd"><div class="pf'+(photos.cmd_fav?' has':'')+'">'+(photos.cmd_fav?'<img src="'+photos.cmd_fav+'" alt="Андрій Мельник «Фаворит»">':'')+'<label for="favph">'+icon(I.cam)+'Додати фото</label><input id="favph" type="file" accept="image/*" data-op="cmd_fav"></div>'+
+'<div class="stack" style="gap:6px"><h2>Андрій Мельник</h2><span class="rk">позивний «Фаворит» · майор</span><p class="sm mu">Командир «Артан Х» — штурмового підрозділу, створеного у 2024 році з добровольців, звільнених умовно-достроково. Бійці підписують контракт і служать на рівних з усіма.</p></div></div>'+
+'<p class="sm mu">До другої річниці підрозділу у 2026 році показали документальний фільм «Вивезти» про евакуацію поранених, знятий на нашоломні камери.</p></div>'+
+'<div class="card stack"><p class="ey">Бойовий шлях</p><div class="tl">'+HIST.map(function(h,i){return '<div class="ev" style="animation-delay:'+(.15+i*.12)+'s"><b>'+h[0]+'</b><p class="sm">'+h[1]+'</p></div>';}).join('')+'</div><a class="btn" href="#unit" data-act="seg" data-s="ops">Відомі спецоперації '+icon(I.arr)+'</a></div>'+'<div class="card stack"><div class="row sb"><p class="ey">Операція</p><div class="dots" role="tablist" aria-label="Операції">'+OPS.map(function(o,i){return '<button role="tab" aria-label="'+esc(o.t)+'" data-act="car" data-i="'+i+'"><i></i></button>';}).join('')+'</div></div><div id="car"></div></div>'+
+'<div class="card stack"><div class="row sb"><div><p class="ey">Твоє звання</p><h3>'+r.name+'</h3></div><div style="text-align:right"><b style="font-family:Oswald,sans-serif;font-size:24px;color:var(--ye)">'+S.xp+'</b><p class="sm mu">балів</p></div></div>'+bar(r)+
+'<div class="row sb"><p class="sm">Виклик дня: 20 присідань і 10 віджимань'+(S.streak>1?' · серія '+S.streak+' дн.':'')+'</p><button data-act="daily" class="'+(dd?'':'pri')+'" style="min-height:40px;flex:none"'+(dd?' disabled':'')+'>'+(dd?'Виконано':'+5')+'</button></div></div>'+
+'<div class="card row"><span style="color:var(--ye)">'+icon(I.mem)+'</span><div style="flex:1"><h3>Хвилина мовчання о 9:00</h3><p class="sm mu">Залишилось <span id="sil">'+silence()+'</span></p></div><a class="btn ghost" style="min-height:40px" href="#unit" data-act="seg" data-s="mem">Пам\'ять</a></div>'+
+'<p class="sm mu">Тестова версія. Дані зберігаються лише на цьому пристрої й нікуди не надсилаються.</p>';}
+function tile(h,ic,b,s,seg){return '<a class="btn tile" href="#'+h+'"'+(seg?' data-act="seg" data-s="'+seg+'"':'')+'>'+icon(ic)+'<span style="color:inherit;font-size:inherit"><b>'+b+'</b><span>'+s+'</span></span></a>';}
+function car(){var el=$('#car');if(!el)return;var o=OPS[ui.car];el.innerHTML='<button class="fade ghost" style="width:100%;border:0;padding:0;text-align:left;justify-content:flex-start;align-items:flex-start;gap:14px" data-act="op" data-id="'+o.id+'"><span class="date">'+o.d+'</span><span><b style="display:block">'+o.t+'</b><span class="sm mu" style="font-weight:400">'+o.s+'</span></span></button>';
+var d=document.querySelectorAll('.dots button');for(var i=0;i<d.length;i++){d[i].className=i===ui.car?'on':'';d[i].setAttribute('aria-selected',i===ui.car);}}
+
+/* ---------- UNIT ---------- */
+function vUnit(){
+if(ui.op){var o=OPS.filter(function(x){return x.id===ui.op;})[0];
+return '<header class="top stack"><button data-act="opback" class="ghost" style="align-self:flex-start">← Усі операції</button><p class="ey">'+o.d.replace('<br>',' ')+'</p><h1>'+o.t+'</h1></header>'+
+(photos[o.id]?'<img class="photo" src="'+photos[o.id]+'" alt="Фото операції: '+esc(o.t)+'">':'<div class="ph">Місце для фото операції</div>')+
+'<div><label for="ph">Додати або замінити фото (зберігається лише на цьому пристрої)</label><input id="ph" type="file" accept="image/*" data-op="'+o.id+'" style="color:var(--mu)"></div>'+
+'<p>'+o.x+'</p><p class="sm mu">Джерело: '+o.src+'</p>';}
+var h='<header class="top stack"><div class="wm" style="font-size:26px">АРТАН</div><p class="sm mu">Знаємо. Знаходимо. Знищуємо.</p></header>'+
+'<div class="seg" role="tablist"><button role="tab" aria-selected="'+(ui.seg==='ops')+'" class="'+(ui.seg==='ops'?'on':'')+'" data-act="seg" data-s="ops">Спецоперації</button><button role="tab" aria-selected="'+(ui.seg==='mem')+'" class="'+(ui.seg==='mem'?'on':'')+'" data-act="seg" data-s="mem">Стіна пам\'яті</button></div>';
+if(ui.seg==='ops')return h+'<p class="sm mu">Лише те, що вже оприлюднено офіційно. Решта стане відомою після перемоги.</p>'+OPS.map(function(o){return '<button class="card row" style="text-align:left;align-items:flex-start;font-weight:400;padding:14px;justify-content:flex-start" data-act="op" data-id="'+o.id+'"><span class="date">'+o.d+'</span><span><b style="display:block">'+o.t+'</b><span class="sm mu">'+o.s+(photos[o.id]?' · фото додано':'')+'</span></span></button>';}).join('');
+var c='';for(var i=0;i<4;i++)c+='<div class="card stack"><div class="ph" style="height:84px">ФОТО</div><div><b>[ІМ\'Я ПРІЗВИЩЕ]</b><p class="sm" style="color:var(--ac)">позивний «[ПОЗИВНИЙ]»</p><p class="sm mu">[РОКИ ЖИТТЯ]</p></div></div>';
+return h+'<p class="sm mu">Воїни «Артану», які віддали життя за Україну. Імена та історії додає підрозділ за згодою родин.</p>'+
+'<div class="card stack" style="text-align:center"><div class="cdl'+(S.candle?' lit':'')+'" id="cnd" aria-hidden="true"><div class="glow"></div><div class="smoke"></div><div class="fw"><div class="flame"></div></div><div class="wick"></div><div class="wax"><i></i><i></i></div></div><p id="cndt" class="sm mu" role="status">'+(S.candle?'Свічка пам\'яті горить. Дякуємо, що пам\'ятаєте.':'Запаліть свічку в пам\'ять про полеглих.')+'</p><button data-act="candle" id="cndb" class="'+(S.candle?'':'pri')+'">'+(S.candle?'Погасити свічку':'Запалити свічку')+'</button></div>'+
+'<div class="grid2">'+c+'</div>';}
+
+/* ---------- MAP ---------- */
+function vMap(){
+return '<header class="top stack"><p class="ey">Відкриті простори</p><h1>«Артан» на карті</h1><p class="sm mu">Місця зустрічі ветеранів, родин і всіх, хто хоче дізнатися про підрозділ. Потягніть карту, щоб повернути, і торкніться міста.</p></header>'+
+'<div class="mapbox" id="map3d"></div><div id="spc"></div>'+
+'<div class="stack"><h2>Міста з просторами</h2><div class="wrap">'+SPACES.map(function(s,i){return '<button class="chip'+(ui.space===i?' on':'')+'" data-act="space" data-i="'+i+'" aria-pressed="'+(ui.space===i)+'">'+s.c+'</button>';}).join('')+'</div></div>'+
+'<p class="sm mu">За відкритими даними просторів уже 13, і з\'являються нові. Точні адреси та години роботи дивіться в офіційних каналах підрозділу.</p>';}
+function map2d(el){var d='M'+UA.map(function(p){return px(p[0])+' '+py(p[1]);}).join('L')+'Z';
+el.innerHTML='<svg viewBox="0 0 360 250" role="group" aria-label="Карта України з просторами «Артан»"><path class="ua" pathLength="1" d="'+d+'"/>'+SPACES.map(function(s,i){var x=px(s.lon),y=py(s.lat);return '<g class="pin" data-act="space" data-i="'+i+'" role="button" tabindex="0" aria-label="Простір «Артан», '+s.c+'"><circle class="pulse" cx="'+x+'" cy="'+y+'" r="3"/><circle cx="'+x+'" cy="'+y+'" r="11" fill="transparent"/><circle class="dot" cx="'+x+'" cy="'+y+'" r="3.600"/><text x="'+(+x+6)+'" y="'+(+y-5)+'">'+s.c+'</text></g>';}).join('')+'</svg>';}
+var mapInst=null;
+function mountMap(){var el=$('#map3d');if(!el)return;
+if(window.ArtanMap3D){try{mapInst=window.ArtanMap3D.mount(el,SPACES,function(i){ui.space=i;if(!S.mapSeen){S.mapSeen=true;save();}spaceCard(false);syncChips();});}catch(e){mapInst=null;}}
+if(!mapInst)map2d(el);
+if(ui.space!==null&&mapInst)mapInst.select(ui.space);}
+function syncChips(){var c=document.querySelectorAll('.chip[data-act=space]');for(var i=0;i<c.length;i++){var on=i===ui.space;c[i].className='chip'+(on?' on':'');c[i].setAttribute('aria-pressed',on);}}
+function spaceCard(scroll){var el=$('#spc');if(!el)return;if(ui.space===null){el.innerHTML='';return;}var s=SPACES[ui.space];
+var url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('Простір Артан '+s.c);
+el.innerHTML='<div class="card stack fade" style="border-color:rgba(242,194,48,.5)"><div class="row sb"><div><p class="ey">Простір «Артан»</p><h2>'+s.c+'</h2></div>'+icon(I.map)+'</div><p class="sm mu">Ветерани, родини, рекрутинг, курси й зустрічі. Точну адресу та години роботи дивіться в офіційних каналах підрозділу.</p><a class="btn pri" href="'+url+'" target="_blank" rel="noopener">'+icon(I.nav)+'Відкрити в навігаторі</a><a class="btn" href="#social">Офіційні канали '+icon(I.arr)+'</a></div>';
+if(mapInst){try{mapInst.select(ui.space);}catch(e){}}else{var p=document.querySelectorAll('.pin');for(var i=0;i<p.length;i++){var on=i===ui.space;p[i].setAttribute('class','pin'+(on?' sel':''));$('.dot',p[i]).setAttribute('r',on?5:3.6);}}
+syncChips();if(scroll)el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+
+/* ---------- ZVYTIAHA ---------- */
+var DISC=['Такмед','Топографія','Керування БпЛА','Рукопашний бій','Поводження зі зброєю','Зв\'язок'];
+function vZv(){var z=ui.zf,d=z.d,h='<header class="top stack"><p class="ey">Військово-патріотичний вишкіл</p><h1>«Звитяга»</h1></header>';
+if(z.step===0)return h+'<div class="hero stack"><h2>П\'ять днів, які загартовують</h2><p class="sm mu">Навчають інструктори спецпідрозділу «Артан». Найближчий заїзд: [ДАТА], [ОБЛАСТЬ].</p><div class="row" style="gap:20px"><div><b style="font-family:Oswald,sans-serif;font-size:26px;color:var(--ye)">13–20</b><p class="sm mu">років</p></div><div><b style="font-family:Oswald,sans-serif;font-size:26px;color:var(--ye)">5</b><p class="sm mu">днів</p></div><div><b style="font-family:Oswald,sans-serif;font-size:26px;color:var(--ye)">19</b><p class="sm mu">вишколів</p></div></div></div>'+
+'<div class="stack"><h2>Чого навчають</h2><div class="wrap">'+DISC.map(function(x){return '<span class="chip" style="display:inline-flex;align-items:center">'+x+'</span>';}).join('')+'</div></div>'+
+'<div class="card stack"><h3>Як подати заявку</h3>'+['Заповніть дані учасника','Вкажіть контакт батьків і дайте згоду','Оберіть напрями та надішліть'].map(function(t,i){return '<div class="row"><span class="num">'+(i+1)+'</span><p>'+t+'</p></div>';}).join('')+'</div>'+
+'<button class="pri" data-act="znext">Почати '+icon(I.arr)+'</button>';
+if(z.step===4)return h+'<svg class="check" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" pathLength="1"/><path d="M30 52l14 14 27-30" pathLength="1"/></svg><div class="card stack" style="text-align:center"><h2>Заявку перевірено</h2><p>'+esc(d.n)+', дякуємо за бажання стати сильнішим.</p><p class="sm mu">Це тестовий режим: дані нікуди не надіслано і не збережено.</p></div><button data-act="zreset">Заповнити ще раз</button>';
+h+='<div class="steps" role="img" aria-label="Крок '+z.step+' з 3">'+[1,2,3].map(function(i){return '<i class="'+(i<=z.step?'on':'')+'"></i>';}).join('')+'</div><p class="sm mu">Крок '+z.step+' з 3</p>';
+if(z.step===1)h+='<form id="zf" class="stack" novalidate><h2>Учасник</h2><div><label for="fn">Ім\'я та прізвище</label><input id="fn" type="text" autocomplete="name" value="'+esc(d.n||'')+'"></div><div><label for="fd">Дата народження</label><input id="fd" type="date" value="'+esc(d.b||'')+'"></div>';
+if(z.step===2)h+='<form id="zf" class="stack" novalidate><h2>Контакти</h2><div><label for="fp">Телефон одного з батьків або опікуна</label><input id="fp" type="tel" autocomplete="tel" placeholder="+380" value="'+esc(d.p||'')+'"></div><div><label for="fcity">Місто або село</label><input id="fcity" type="text" value="'+esc(d.city||'')+'"></div><div class="row"><input id="fc" type="checkbox" style="width:24px;height:24px;flex:none;accent-color:#F2C230"'+(d.c?' checked':'')+'><label for="fc" style="margin:0;color:var(--tx)">Є згода батьків або опікуна (обов\'язково до 18 років)</label></div>';
+if(z.step===3)h+='<form id="zf" class="stack" novalidate><h2>Що цікавить найбільше?</h2><div class="wrap">'+DISC.map(function(x,i){var on=(d.dis||[]).indexOf(i)>-1;return '<button type="button" class="chip'+(on?' on':'')+'" aria-pressed="'+on+'" data-act="zdis" data-i="'+i+'">'+x+'</button>';}).join('')+'</div><div class="card stack"><p class="ey">Перевірте дані</p><p><b>'+esc(d.n)+'</b>, '+d.age+' р.</p><p class="sm mu">'+esc(d.city)+' · '+esc(d.p)+'</p></div>';
+h+=(z.err?'<div class="msg no" role="alert">'+z.err+'</div>':'')+'<div class="row"><button type="button" class="ghost" data-act="zback">Назад</button><button class="pri" type="submit" style="flex:1">'+(z.step===3?'Надіслати заявку':'Далі')+'</button></div></form>';
+return h;}
+function zSubmit(){var z=ui.zf,d=z.d,err='';
+if(z.step===1){d.n=$('#fn').value.trim();d.b=$('#fd').value;
+if(d.n.split(/\s+/).length<2)err='Вкажіть ім\'я та прізвище.';else if(!d.b)err='Вкажіть дату народження.';
+else{var b=new Date(d.b),n=new Date();d.age=n.getFullYear()-b.getFullYear()-((n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate()))?1:0);if(d.age<13||d.age>20)err='Вишкіл розрахований на учасників від 13 до 20 років.';}}
+else if(z.step===2){d.p=$('#fp').value.trim();d.city=$('#fcity').value.trim();d.c=$('#fc').checked;
+if(d.p.replace(/\D/g,'').length<10)err='Вкажіть телефон у форматі +380XXXXXXXXX.';else if(!d.city)err='Вкажіть місто або село.';else if(d.age<18&&!d.c)err='Для учасників до 18 років потрібна згода батьків або опікуна.';}
+else if(z.step===3){if(!(d.dis||[]).length)err='Оберіть хоча б один напрям.';}
+z.err=err;if(!err){z.step++;if(z.step===4)confetti();}render(!err);}
+
+/* ---------- SCHOOL ---------- */
+function vSchool(){
+if(ui.game)return '<div id="game"></div>';
+if(ui.mission)return vMission();
+var r=rank();
+var h='<header class="top stack"><p class="ey">Для дітей і підлітків</p><h1>Школа захисника</h1><p class="sm mu">Проходь місії, грай і здобувай звання. Усе тут про те, як уберегти себе та близьких.</p></header>'+
+'<div class="idc stack"><div class="row"><img src="img/emblem.png" alt="" class="em"><div style="flex:1"><p class="ey">Жетон захисника</p><h2>«'+esc(S.call||'Без позивного')+'»</h2><p class="sm mu">'+r.name+' · '+S.xp+' балів</p></div></div>'+bar(r)+(S.call&&!ui.editId?'<div class="row sb"><span class="sm mu">'+(S.city?'📍 '+esc(S.city):'Місто не вказано')+'</span><button data-act="editid" class="ghost" style="min-height:40px">Змінити</button></div></div>':'<div class="row" style="gap:8px"><input id="call" type="text" maxlength="14" placeholder="Твій позивний" aria-label="Твій позивний" value="'+esc(S.call||'')+'"><button data-act="callgen" style="flex:none;padding:0 12px" aria-label="Запропонувати позивний">🎲</button></div><input id="city" type="text" maxlength="24" placeholder="Місто чи село (за бажанням)" aria-label="Місто чи село, за бажанням" value="'+esc(S.city||'')+'"><button data-act="callsave" class="pri">Зберегти жетон</button><p class="sm mu">Вигадай позивний. Справжнє ім\'я, прізвище, школу чи адресу не вказуй.</p></div>')+
+'<div class="seg" role="tablist"><button role="tab" aria-selected="'+(ui.ss!=='lb')+'" class="'+(ui.ss!=='lb'?'on':'')+'" data-act="ss" data-s="learn">Навчання</button><button role="tab" aria-selected="'+(ui.ss==='lb')+'" class="'+(ui.ss==='lb'?'on':'')+'" data-act="ss" data-s="lb">Рейтинг</button></div>'+
+(ui.ss==='lb'?vBoard()+'<!--END-->':'')+
+(ui.ss==='lb'?'':'<div class="stack"><h2>Програма за віком</h2><div class="wrap">'+AGES.map(function(a){return '<button data-act="age" data-a="'+a.a+'" class="'+(S.age===a.a?'pri':'')+'" aria-pressed="'+(S.age===a.a)+'">'+a.n+'</button>';}).join('')+'</div></div>');
+if(h.indexOf('<!--END-->')>-1)return h;
+if(!S.age)return h+'<div class="card"><p>Обери свій вік, щоб відкрити місії та ігри.</p></div>';
+var ag=AGES.filter(function(a){return a.a===S.age;})[0];
+h+='<div class="stack"><h2>Місії програми «'+ag.r+'»</h2>'+MISSIONS.filter(function(m){return m.min<=S.age;}).map(function(m,i){var d=S.done[m.id];return '<button class="card row sb" style="padding:14px;text-align:left" data-act="mission" data-id="'+m.id+'"><span class="row"><span class="num">'+(i+1)+'</span><span><b>'+m.t+'</b><span class="sm mu" style="display:block;font-weight:400">Урок і 3 запитання · до 30 балів</span></span></span><span class="badge'+(d?'':' off')+'">'+(d?'Пройдено':'Почати')+'</span></button>';}).join('')+'</div>';
+h+='<div class="stack"><h2>Ігри</h2>'+[['touch','🃏','Чіпати чи ні?','Гортай картки: праворуч — можна, ліворуч — небезпечно. 3 життя.'],['pack','🎒','Тривожний наплічник','Збери 8 потрібних речей, поки біжить час.'],['mem','🧠','Номери порятунку','Знайди пари: номер і служба.'],['morse','📡','Азбука Морзе','Розшифруй сигнал ліхтарика: крапки й тире.']].map(function(g){return '<button class="card row" style="padding:14px;text-align:left;justify-content:flex-start" data-act="game" data-g="'+g[0]+'"><span style="font-size:34px" aria-hidden="true">'+g[1]+'</span><span style="flex:1"><b>'+g[2]+'</b><span class="sm mu" style="display:block;font-weight:400">'+g[3]+'</span></span><span class="badge'+(S.done[g[0]]?'':' off')+'">'+(S.done[g[0]]?'Пройдено':'Грати')+'</span></button>';}).join('')+'</div>';
+h+='<a class="btn card" href="#diploma" style="padding:14px;justify-content:flex-start;text-align:left;font-weight:400;border-color:rgba(242,194,48,.45)"><span style="font-size:34px" aria-hidden="true">📜</span><span style="flex:1"><b style="display:block">Диплом захисника</b><span class="sm mu">Створи диплом зі своїм позивним або ім\'ям</span></span>'+icon(I.arr)+'</a>';
+h+='<div class="stack"><h2>Відзнаки</h2><div class="wrap">'+MISSIONS.map(function(m){return '<span class="badge'+(S.done[m.id]?'':' off')+'">'+m.t+'</span>';}).join('')+'<span class="badge'+(S.done.touch?'':' off')+'">Пильне око</span><span class="badge'+(S.done.pack?'':' off')+'">Наплічник</span><span class="badge'+(S.done.mem?'':' off')+'">Номери порятунку</span><span class="badge'+(S.done.morse?'':' off')+'">Радист</span></div></div>';
+return h;}
+function vMission(){var m=MISSIONS.filter(function(x){return x.id===ui.mission;})[0];
+var h='<header class="top stack"><button data-act="mback" class="ghost" style="align-self:flex-start">← До місій</button><p class="ey">Місія</p><h1>'+m.t+'</h1></header>';
+if(ui.q===-1)return h+'<div class="card"><h3 style="margin-bottom:8px">Запам\'ятай</h3><ul>'+m.tips.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ul></div><button class="pri" data-act="qstart">До запитань '+icon(I.arr)+'</button>';
+if(ui.q>=m.q.length)return h+'<div class="big" aria-hidden="true">🎖️</div><div class="card stack" style="text-align:center"><h2>Місію завершено</h2><p>Правильних відповідей: '+ui.score+' з '+m.q.length+'</p><p class="mu sm">Нараховано '+ui.gain+' балів</p></div><button class="pri" data-act="mback">Далі</button>';
+var q=m.q[ui.q];
+h+='<div class="steps" aria-hidden="true">'+m.q.map(function(_,i){return '<i class="'+(i<=ui.q?'on':'')+'"></i>';}).join('')+'</div><p class="sm mu">Запитання '+(ui.q+1)+' з '+m.q.length+'</p><h2>'+q[0]+'</h2>'+q[1].map(function(o,i){var c='opt';if(ui.ans!==null){if(i===q[2])c+=' good';else if(i===ui.ans)c+=' wrong';}return '<button class="'+c+'" data-act="ans" data-i="'+i+'"'+(ui.ans!==null?' disabled':'')+'>'+o+'</button>';}).join('');
+if(ui.ans!==null)h+='<div class="msg '+(ui.ans===q[2]?'ok':'no')+'" role="status">'+(ui.ans===q[2]?'Правильно!':'Не зовсім. Правильна відповідь: '+q[1][q[2]])+'</div><button class="pri" data-act="qnext">Далі</button>';
+return h;}
+
+/* ---------- GAMES ---------- */
+function gHead(t,s){return '<header class="top stack"><button data-act="mback" class="ghost" style="align-self:flex-start">← До ігор</button><p class="ey">Гра</p><h1>'+t+'</h1><p class="sm mu">'+s+'</p></header>';}
+function gEnd(box,id,title,line,pts,win){clearTimers();if(win&&!S.win){S.win=true;}var gain=award(id,pts);if(win)confetti();
+box.innerHTML='<div class="view stack">'+gHead(title,'')+'<div class="big" aria-hidden="true">'+(win?'🏆':'💪')+'</div><div class="card stack" style="text-align:center"><h2>'+(win?'Відмінний результат!':'Гарна спроба')+'</h2><p>'+line+'</p><p class="sm mu">Нараховано '+gain+' балів</p></div><button class="pri" data-act="game" data-g="'+id+'">Зіграти ще</button><button data-act="mback">До школи</button></div>';window.scrollTo(0,0);}
+
+function startTouch(box){var deck=shuffle(TOUCH),i=0,lives=3,score=0,streak=0,busy=false;
+box.innerHTML='<div class="view stack">'+gHead('Чіпати чи ні?','Своє і знайоме можна брати. Чуже й невідоме не чіпаємо і кажемо дорослим.')+
+'<div class="hud"><span class="hearts" id="hp" role="img" aria-label="Життя: 3"><span>♥</span><span>♥</span><span>♥</span></span><span id="cnt"></span><span id="sc">0 балів</span></div><div class="deck" id="deck"></div><div class="toast" id="tst" role="status"></div>'+
+'<div class="grid2"><button data-v="0" class="tb" style="border-color:var(--bad)">← Не чіпаю</button><button data-v="1" class="tb" style="border-color:var(--ok)">Можна →</button></div></div>';
+var dk=$('#deck',box),tst=$('#tst',box),card,sx=0,dx=0,drag=false;
+function show(){if(i>=deck.length||lives<=0)return gEnd(box,'touch','Чіпати чи ні?','Правильно: '+score+' з '+deck.length+'.',score*3,lives>0&&score>=8);
+var t=deck[i];$('#cnt',box).textContent=(i+1)+' / '+deck.length;
+dk.innerHTML='<div class="scard" tabindex="0" aria-label="'+esc(t[1])+'"><span class="tag l">НЕ ЧІПАЮ</span><span class="tag r">МОЖНА</span><div class="emo" aria-hidden="true">'+t[0]+'</div><h2>'+t[1]+'</h2><p class="sm mu">Потягни картку вбік</p></div>';card=dk.firstChild;busy=false;
+card.addEventListener('pointerdown',function(e){if(busy)return;drag=true;sx=e.clientX;dx=0;card.style.transition='none';try{card.setPointerCapture(e.pointerId);}catch(_){}});
+card.addEventListener('pointermove',function(e){if(!drag)return;dx=e.clientX-sx;card.style.transform='translateX('+dx+'px) rotate('+(dx/14)+'deg)';$('.tag.r',card).style.opacity=Math.max(0,Math.min(1,dx/80));$('.tag.l',card).style.opacity=Math.max(0,Math.min(1,-dx/80));});
+function up(){if(!drag)return;drag=false;card.style.transition='transform .3s';if(Math.abs(dx)>80)decide(dx>0?1:0);else{card.style.transform='';$('.tag.r',card).style.opacity=0;$('.tag.l',card).style.opacity=0;}}
+card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);}
+function decide(v){if(busy)return;busy=true;var t=deck[i],ok=v===t[2];card.classList.add('fly');card.style.transform='translateX('+(v?420:-420)+'px) rotate('+(v?28:-28)+'deg)';card.style.opacity=0;
+if(ok){score++;streak++;tst.className='toast ok';tst.textContent='Правильно!'+(streak>=3?' Серія '+streak+'!':'')+(t[2]?' Це твоя знайома річ.':' Невідоме може бути небезпечним.');}
+else{lives--;streak=0;tst.className='toast no';tst.textContent=t[2]?'Це твоя річ, її можна брати.':'Ні! Чужі та невідомі предмети не чіпаємо.';var hs=$('#hp',box).children;if(hs[lives])hs[lives].className='off';$('#hp',box).setAttribute('aria-label','Життя: '+lives);}
+$('#sc',box).textContent=(score*3)+' балів';i++;later(show,900);}
+box.addEventListener('click',function(e){var b=e.target.closest('.tb');if(b&&!busy)decide(+b.getAttribute('data-v'));});
+show();}
+
+function startPack(box){var items=shuffle(PACK),left=45,total=45,got=0,bad=0,over=false;
+box.innerHTML='<div class="view stack">'+gHead('Тривожний наплічник','Торкайся лише того, що справді потрібно в укритті чи дорозі. Помилка забирає 4 секунди.')+
+'<div class="hud"><span><span class="bag" id="bag" aria-hidden="true">🎒</span> <span id="got" role="status">0 / 8</span></span><span id="tm">45 с</span></div><div class="bar" aria-hidden="true"><i id="tb" style="width:100%;transition:width .2s linear"></i></div>'+
+'<div class="items">'+items.map(function(p,i){return '<button class="item" data-i="'+i+'" style="animation-delay:'+(i*.04)+'s"><span class="e" aria-hidden="true">'+p[0]+'</span>'+p[1]+'</button>';}).join('')+'</div><div class="toast" id="tst" role="status"></div></div>';
+function fin(){if(over)return;over=true;gEnd(box,'pack','Тривожний наплічник','Зібрано '+got+' з 8 речей. Помилок: '+bad+'. Потрібне: '+PACK.filter(function(p){return p[2];}).map(function(p){return p[1].toLowerCase();}).join(', ')+'.',Math.max(0,got*3-bad)+(got===8?Math.floor(left/5):0),got===8);}
+every(function(){left-=.2;if(left<=0){left=0;fin();}var tb=$('#tb',box);if(tb){tb.style.width=(left/total*100)+'%';$('#tm',box).textContent=Math.ceil(left)+' с';if(left<10)tb.style.background='var(--bad)';}},200);
+box.addEventListener('click',function(e){var b=e.target.closest('.item');if(!b||over)return;var p=items[+b.getAttribute('data-i')],tst=$('#tst',box);
+if(p[2]){b.classList.add('packed');b.setAttribute('disabled','');got++;$('#got',box).textContent=got+' / 8';var bg=$('#bag',box);bg.classList.remove('b');void bg.offsetWidth;bg.classList.add('b');tst.className='toast ok';tst.textContent=p[1]+' — у наплічнику!';if(got===8)later(fin,500);}
+else{bad++;left=Math.max(0,left-4);b.classList.remove('no');void b.offsetWidth;b.classList.add('no');tst.className='toast no';tst.textContent=p[1]+' — зайва вага. −4 секунди';}});}
+
+function startMem(box){var cards=[];PAIRS.forEach(function(p,i){cards.push({k:i,t:p[0],num:true});cards.push({k:i,t:p[1]});});cards=shuffle(cards);var open=[],lock=false,found=0,moves=0;
+box.innerHTML='<div class="view stack">'+gHead('Номери порятунку','Відкривай по дві картки і знаходь пари: номер або сигнал та що він означає.')+
+'<div class="hud"><span id="mv" role="status">Ходів: 0</span><span id="fd">Пар: 0 / 6</span></div><div class="mem">'+cards.map(function(c,i){return '<button class="mc" data-i="'+i+'" aria-label="Закрита картка" style="animation:pop .4s '+(i*.03)+'s backwards"><i class="fr" aria-hidden="true">А</i><i class="bk'+(c.num?' num':'')+'">'+c.t+'</i></button>';}).join('')+'</div></div>';
+box.addEventListener('click',function(e){var b=e.target.closest('.mc');if(!b||lock||b.classList.contains('fl'))return;var i=+b.getAttribute('data-i');b.classList.add('fl');b.setAttribute('aria-label',cards[i].t);open.push(b);
+if(open.length<2)return;moves++;$('#mv',box).textContent='Ходів: '+moves;var a=cards[+open[0].getAttribute('data-i')],c=cards[i];
+if(a.k===c.k){open[0].classList.add('done');open[1].classList.add('done');open=[];found++;$('#fd',box).textContent='Пар: '+found+' / 6';if(found===6)later(function(){gEnd(box,'mem','Номери порятунку','Усі пари знайдено за '+moves+' ходів.',Math.max(10,36-moves),moves<=14);},700);}
+else{lock=true;later(function(){open.forEach(function(x){x.classList.remove('fl');x.setAttribute('aria-label','Закрита картка');});open=[];lock=false;},900);}});}
+
+function startMorse(box){var M={'А':'·−','Б':'−···','В':'·−−','Д':'−··','Е':'·','Ж':'···−','З':'−−··','К':'−·−','Л':'·−··','М':'−−','Н':'−·','О':'−−−','П':'·−−·','Р':'·−·','С':'···','Т':'−','У':'··−'};
+var keys=Object.keys(M),rounds=shuffle(keys).slice(0,8),i=0,score=0,busy=false,fl=[];
+box.innerHTML='<div class="view stack">'+gHead('Азбука Морзе','Ліхтарик передає літеру: короткий спалах — крапка, довгий — тире. Яка це літера?')+
+'<div class="hud"><span id="cnt"></span><span id="sc">0 балів</span></div><div class="lamp" id="lamp" aria-hidden="true"></div><div class="mcode" id="code" role="img"></div><div class="grid2" id="opts"></div><div class="toast" id="tst" role="status"></div><button class="rp ghost">Повторити сигнал</button>'+
+'<details><summary>Шпаргалка радиста</summary><div class="mtab">'+keys.map(function(k){return '<span><b>'+k+'</b> '+M[k]+'</span>';}).join('')+'</div></details></div>';
+var lamp=$('#lamp',box);
+function play(){fl.forEach(clearTimeout);fl=[];lamp.className='lamp';var t=350,c=M[rounds[i]];for(var j=0;j<c.length;j++){var d=c[j]==='·'?200:620;fl.push(later(function(){lamp.className='lamp on';},t));fl.push(later(function(){lamp.className='lamp';},t+d));t+=d+230;}}
+function show(){if(i>=rounds.length)return gEnd(box,'morse','Азбука Морзе','Розшифровано '+score+' з '+rounds.length+' літер.',score*4,score>=6);
+var L=rounds[i],o=shuffle([L].concat(shuffle(keys.filter(function(k){return k!==L;})).slice(0,3)));busy=false;
+$('#cnt',box).textContent=(i+1)+' / '+rounds.length;var c=$('#code',box);c.textContent=M[L];c.setAttribute('aria-label',M[L].replace(/·/g,'крапка ').replace(/−/g,'тире '));
+$('#opts',box).innerHTML=o.map(function(k){return '<button class="mo" data-k="'+k+'">'+k+'</button>';}).join('');play();}
+box.addEventListener('click',function(e){if(e.target.closest('.rp')){if(!busy)play();return;}var b=e.target.closest('.mo');if(!b||busy)return;busy=true;var L=rounds[i],ok=b.getAttribute('data-k')===L,tst=$('#tst',box);
+var all=box.querySelectorAll('.mo');for(var j=0;j<all.length;j++){all[j].disabled=true;if(all[j].getAttribute('data-k')===L)all[j].classList.add('opt','good');}
+if(ok){score++;tst.className='toast ok';tst.textContent='Прийнято! Це літера '+L+'.';}else{b.classList.add('opt','wrong');tst.className='toast no';tst.textContent='Це була літера '+L+' ('+M[L]+').';}
+$('#sc',box).textContent=(score*4)+' балів';i++;later(show,1100);});
+show();}
+
+/* ---------- MORE / MERCH / SOCIAL / SOS ---------- */
+function lnk(href,ic,b,sub,ext){return '<a class="btn card lnk" href="'+href+'"'+(ext?' target="_blank" rel="noopener"':'')+'><span class="bi">'+icon(ic)+'</span><span style="flex:1"><b>'+b+'</b><span class="sm mu">'+sub+'</span></span>'+icon(I.arr)+'</a>';}
+function vMore(){return '<header class="top stack"><div class="wm" style="font-size:26px">АРТАН</div><h1>Більше</h1></header>'+
+lnk('#zvytiaha',I.flag,'Вишкіл «Звитяга»','Програма і заявка для молоді 13–20 років')+lnk('#diploma',I.sch,'Диплом захисника','Зображення з твоїми досягненнями')+lnk('#projects',I.ppl,'Проєкти «Артан»','Простори, «Звитяга», «Артан клан», турніри')+lnk('#merch',I.tee,'Мерч','Одяг і символіка підрозділу')+lnk('#social',I.soc,'Соцмережі та проєкти','Офіційні сторінки й ініціативи «Артану»')+lnk('#sos',I.sos,'SOS-пам\'ятка','Екстрені номери і дії в небезпеці')+
+'<div class="card stack"><div class="row">'+icon(I.info)+'<h3>Про застосунок</h3></div><p class="sm mu">Тестова версія для цивільних і дітей. Особисті дані не збираються: прогрес, позивний і додані фото зберігаються лише на цьому пристрої.</p></div>';}
+
+var MERCH=[{id:'tee',n:'Футболка «Артан»',sz:1},{id:'hood',n:'Худі з емблемою',sz:1},{id:'cap',n:'Кепка',sz:0},{id:'patch',n:'Шеврон-емблема',sz:0},{id:'stick',n:'Стікерпак',sz:0},{id:'mug',n:'Горнятко',sz:0}];
+function art(k){var st=' fill="#2B3022" stroke="#C3C79A" stroke-width="1.5" stroke-linejoin="round"',em=function(x,y,w){return '<image href="img/emblem.png" x="'+x+'" y="'+y+'" width="'+w+'" height="'+w+'"/>';},b='';
+if(k==='tee')b='<path d="M30 22L45 14Q60 24 75 14L90 22L108 40L94 54L86 48V108H34V48L26 54L12 40Z"'+st+'/>'+em(42,46,36);
+if(k==='hood')b='<path d="M38 22Q60 4 82 22L100 34L112 94L98 98L90 60V112H30V60L22 98L8 94L20 34Z"'+st+'/><path d="M46 24Q60 40 74 24" fill="none" stroke="#C3C79A" stroke-width="1.5"/><path d="M42 92h36v20H42z" fill="none" stroke="#C3C79A" stroke-width="1" opacity=".6"/>'+em(43,46,34);
+if(k==='cap')b='<path d="M22 74Q24 34 60 34Q96 34 98 74Z"'+st+'/><path d="M20 74Q62 62 114 82Q70 88 20 74Z"'+st+'/>'+em(46,42,28);
+if(k==='patch')b='<circle cx="60" cy="60" r="44"'+st+' stroke-dasharray="3 3"/>'+em(20,20,80);
+if(k==='stick')b='<g transform="rotate(-12 44 60)"><rect x="18" y="34" width="52" height="52" rx="10"'+st+'/>'+em(24,40,40)+'</g><g transform="rotate(10 78 66)"><rect x="54" y="42" width="50" height="50" rx="25"'+st+'/>'+em(59,47,40)+'</g>';
+if(k==='mug')b='<path d="M30 34H82V96Q82 104 74 104H38Q30 104 30 96Z"'+st+'/><path d="M82 46H94Q104 46 104 60V70Q104 84 94 84H82" fill="none" stroke="#C3C79A" stroke-width="5"/>'+em(38,50,36);
+return '<svg viewBox="0 0 120 120" role="img" aria-label="Ескіз товару">'+b+'</svg>';}
+function cartCount(){return ui.cart.reduce(function(a,c){return a+c.q;},0);}
+function vMerch(){var h='<header class="top stack"><p class="ey">Тестовий каталог</p><h1>Мерч «Артан»</h1><p class="sm mu">Ескізи товарів з емблемою підрозділу. Ціни та магазин ще не підключено.</p></header>'+
+'<button class="card row sb" data-act="mcart" style="padding:12px 14px" aria-expanded="'+!!ui.cartOpen+'"><span class="row">'+icon(I.tee)+'<b>Кошик</b></span><span class="cartn" id="cartn">'+cartCount()+'</span></button>';
+if(ui.cartOpen)h+='<div class="card stack fade">'+(ui.cart.length?ui.cart.map(function(c,i){return '<div class="row sb"><span><b>'+c.n+'</b><span class="sm mu" style="display:block">'+(c.s?'Розмір '+c.s+' · ':'')+c.q+' шт. · [ЦІНА]</span></span><button data-act="mrem" data-i="'+i+'" class="ghost" style="min-height:40px" aria-label="Прибрати '+esc(c.n)+'">Прибрати</button></div>';}).join('')+(ui.cartMsg?'<div class="msg ok" role="status">Тестовий режим: замовлення не оформлено. Тут буде оплата й доставка, коли підключать магазин.</div>':'')+'<button class="pri" data-act="mcheck">Оформити замовлення</button>':'<p class="sm mu">Кошик порожній. Додайте товар з каталогу.</p>')+'</div>';
+h+='<div class="grid2">'+MERCH.map(function(m,i){var cur=ui.msize[m.id]||'M';return '<div class="card stack prod">'+art(m.id)+'<div><b>'+m.n+'</b><p class="sm mu">[ЦІНА]</p></div>'+(m.sz?'<div class="sz" role="group" aria-label="Розмір">'+['S','M','L','XL'].map(function(z){return '<button data-act="msize" data-id="'+m.id+'" data-z="'+z+'" class="'+(z===cur?'on':'')+'" aria-pressed="'+(z===cur)+'">'+z+'</button>';}).join('')+'</div>':'<div style="height:32px"></div>')+'<button class="pri add" data-act="madd" data-i="'+i+'">До кошика</button></div>';}).join('')+'</div>'+
+'<div class="card stack"><p class="ey">Вже існує</p><h3>Поштова марка «Артан»</h3><p class="sm mu">Укрпошта випустила лімітований тираж марки про бойовий шлях підрозділу: 1670 примірників, травень 2025 року.</p><a class="btn" href="https://gur.gov.ua/content/na-chest-voiniv-hur-ukrposhta-vypustyla-marku-prysviachenu-spetspidrozdilu-artan.html" target="_blank" rel="noopener">Докладніше на сайті ГУР '+icon(I.arr)+'</a></div>';
+return h;}
+
+function vSocial(){return '<header class="top stack"><p class="ey">Офіційні сторінки</p><h1>«Артан» у мережі</h1><p class="sm mu">Підписуйтесь лише на офіційні сторінки: ворог створює фейкові канали підрозділів ГУР.</p></header>'+
+'<h2>Спецпідрозділ «Артан»</h2>'+socList(MAIN_SOC.concat([['web','artan-gur.com','https://www.artan-gur.com/','Анкета до підрозділу, спеціальності']]))+
+'<h2>Проєкти та підрозділи</h2>'+socList([['ig','@zvytiaha.artan','https://www.instagram.com/zvytiaha.artan/','Вишкіл «Звитяга»'],['ig','@artan_x_gur','https://www.instagram.com/artan_x_gur/','Підрозділ «Артан Х»'],['ig','@artan.clan','https://www.instagram.com/artan.clan/','Мотоклуб «Артан клан»']])+
+'<h2>Відео</h2>'+
+'<a class="btn card vid" href="https://www.youtube.com/channel/UCj4a5joxrLFLd7gCX-90mUw" target="_blank" rel="noopener"><span class="th">'+icon(I.ply)+'</span><span><b style="display:block">Канал «Артану» на YouTube</b><span class="sm mu">Кадри бойових завдань, інтерв\'ю, документальні стрічки</span></span></a>'+
+'<a class="btn card vid" href="https://armyinform.com.ua/2026/06/25/u-kyyevi-prezentuvaly-dokumentalnyj-film-vyvezty-do-drugoyi-richnyczi-pidrozdilu-artan-h/" target="_blank" rel="noopener"><span class="th">'+icon(I.ply)+'</span><span><b style="display:block">Фільм «Вивезти»</b><span class="sm mu">Документальна стрічка до другої річниці «Артан Х»</span></span></a>'+
+'<h2>Проєкти «Артану»</h2>'+lnk('#projects',I.ppl,'Усі проєкти','Простори, «Звитяга», «Артан клан», турніри, фільм, мурал');}
+
+function vSos(){return '<header class="top stack"><p class="ey">Пам\'ятка</p><h1>Що робити в небезпеці</h1><p class="sm mu">Номери працюють по всій Україні. Якщо дзвінок не відкривається з застосунку, наберіть номер вручну.</p></header>'+
+'<div class="grid2">'+[['112','Єдиний екстрений номер'],['101','Рятувальники, пожежа'],['102','Поліція'],['103','Швидка допомога']].map(function(t){return '<a class="btn tel" href="tel:'+t[0]+'"><b>'+t[0]+'</b><span>'+t[1]+'</span></a>';}).join('')+'</div>'+
+[['alarm','Повітряна тривога'],['mine','Підозрілий або невідомий предмет'],['aid','Людина поранена'],['cyber','Підозрілий незнайомець у мережі']].map(function(x){var m=MISSIONS.filter(function(k){return k.id===x[0];})[0];return '<details><summary>'+x[1]+'</summary><ul>'+m.tips.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ul></details>';}).join('')+
+'<a class="btn pri" href="#school">Потренуватися в Школі захисника '+icon(I.arr)+'</a>';}
+
+/* ---------- DIPLOMA ---------- */
+var dl=null;
+function vDiploma(){var d=ui.dip||(ui.dip={mode:S.call?'call':'fio',name:'',url:null,busy:false,msg:''});var done=MISSIONS.filter(function(m){return S.done[m.id];});
+return '<header class="top stack"><button class="ghost" data-act="back" style="align-self:flex-start">← Назад</button><p class="ey">Нагорода</p><h1>Диплом захисника</h1><p class="sm mu">Створи власний диплом з досягненнями зі Школи захисника і збережи його як зображення.</p></header>'+
+(done.length?'':'<div class="msg no">Поки не пройдено жодної місії. Диплом можна створити й зараз, але з місіями він виглядатиме краще.</div>')+
+'<div class="card stack"><p class="ey">Що написати в дипломі</p><div class="seg" role="radiogroup" aria-label="Що написати"><button role="radio" aria-checked="'+(d.mode==='call')+'" class="'+(d.mode==='call'?'on':'')+'" data-act="dmode" data-m="call">Позивний</button><button role="radio" aria-checked="'+(d.mode==='fio')+'" class="'+(d.mode==='fio'?'on':'')+'" data-act="dmode" data-m="fio">Ім\'я та прізвище</button></div>'+
+(d.mode==='call'?'<div><label for="dname">Позивний</label><input id="dname" type="text" maxlength="14" value="'+esc(d.name||S.call||'')+'" placeholder="Наприклад, Сокіл"></div>':'<div><label for="dname">Ім\'я та прізвище</label><input id="dname" type="text" maxlength="40" autocomplete="off" value="'+esc(d.name||'')+'" placeholder="Як написати в дипломі"></div><p class="sm mu">Ім\'я потрапить лише в зображення на цьому пристрої. Застосунок його не зберігає і нікуди не надсилає.</p>')+
+'<div class="row sb"><span class="sm">Звання: <b>'+rank().name+'</b> · '+S.xp+' балів</span><span class="sm mu">'+done.length+' місій</span></div>'+
+'<button class="pri" data-act="dgen"'+(d.busy?' disabled':'')+'>'+(d.busy?'Створюю…':(d.url?'Оновити диплом':'Створити диплом'))+'</button></div>'+
+(d.busy||d.url?'<div class="dprev">'+(d.url?'<img src="'+d.url+'" alt="Диплом захисника для '+esc(d.shown||'')+'">':'<div class="sp" role="status" aria-label="Створюю диплом"></div>')+'</div>':'')+
+(d.url?'<button class="pri" data-act="dsave">Зберегти зображення</button><p class="sm mu">Якщо кнопка не спрацює, натисни на диплом і утримуй, щоб зберегти зображення.</p>':'')+
+(d.msg?'<div class="msg '+(d.ok?'ok':'no')+'" role="status">'+d.msg+'</div>':'');}
+function dGen(){var d=ui.dip,el=$('#dname'),n=(el?el.value:'').trim();
+if(!n){d.msg=d.mode==='call'?'Вкажи позивний.':'Вкажи ім\'я та прізвище.';d.ok=false;render();return;}
+if(!window.ArtanDiploma){d.msg='Генератор диплома ще не завантажився. Спробуй за мить.';d.ok=false;render();return;}
+d.name=n;d.busy=true;d.msg='';render();
+var mis=MISSIONS.filter(function(m){return S.done[m.id];}).map(function(m){return m.t;});
+var serial='АР-'+new Date().getFullYear()+'-'+String(1000+Math.floor(Math.random()*9000));
+window.ArtanDiploma.render({name:n,mode:d.mode,rank:rank().name,xp:S.xp,city:S.city||'',missions:mis,date:new Date(),serial:serial}).then(function(cv){
+cv.toBlob(function(bl){if(d.url)try{URL.revokeObjectURL(d.url);}catch(e){}d.blob=bl;d.url=URL.createObjectURL(bl);d.shown=n;d.busy=false;if(!S.done.diploma){S.done.diploma=true;save();confetti();}if(tab()==='diploma')render();},'image/png');
+}).catch(function(){d.busy=false;d.msg='Не вдалося створити диплом. Спробуй ще раз.';d.ok=false;render();});}
+function dSave(){var d=ui.dip;if(!d||!d.blob)return;var fn='Диплом-захисника-'+d.shown.replace(/[^\wА-Яа-яЇїІіЄєҐґ\- ]/g,'').replace(/\s+/g,'-')+'.png';
+var go=function(api){if(!api){d.msg='Збереження тут недоступне. Натисни на диплом і утримуй, щоб зберегти зображення.';d.ok=false;render();return;}
+api.save({filename:fn,data:d.blob}).then(function(){d.msg='Диплом збережено!';d.ok=true;render();},function(e){d.msg=e&&e.code==='declined'?'Збереження скасовано.':'Не вдалося зберегти. Натисни на диплом і утримуй, щоб зберегти зображення.';d.ok=false;render();});};
+if(dl!==null)return go(dl);
+if(window.claude&&window.claude.use){window.claude.use('downloads').then(function(a){dl=a;go(a);},function(){dl=null;go(null);});}else go(null);}
+
+var SOC={
+ig:['ig','<rect x="3.500" y="3.500" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="7" r="1.200" fill="currentColor"/>','Instagram'],
+tg:['tg','<path d="M20 5L3.500 11.500l5.500 2 2 6 3-4 4.500 3.500z" fill="currentColor"/>','Telegram'],
+yt:['yt','<path d="M10 8.500v7l6-3.500z" fill="currentColor"/>','YouTube'],
+fb:['fb','<path d="M13.500 21v-7.500H16l.5-3h-3V8.700c0-.9.3-1.500 1.600-1.500h1.500V4.500c-.3 0-1.200-.1-2.300-.1-2.300 0-3.800 1.400-3.800 3.900v2.200H8v3h2.500V21z" fill="currentColor"/>','Facebook'],
+web:['web','<circle cx="12" cy="12" r="8.500" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.500 12h17M12 3.500c3 3 3 14 0 17M12 3.500c-3 3-3 14 0 17" fill="none" stroke="currentColor" stroke-width="1.600"/>','Сайт']};
+var MAIN_SOC=[['ig','@artan.gur','https://www.instagram.com/artan.gur/','Фото й відео підрозділу'],['tg','@artan_gur','https://t.me/artan_gur','Новини та анонси'],['yt','@Artan_DIU','https://www.youtube.com/@Artan_DIU','Бойова робота, інтерв\'ю'],['fb','artan.gur','https://www.facebook.com/artan.gur','Офіційна сторінка']];
+function socList(list){return '<div class="socs">'+list.map(function(x){var k=SOC[x[0]];return '<a class="soc" href="'+x[2]+'" target="_blank" rel="noopener"><span class="si '+k[0]+'" aria-hidden="true"><svg viewBox="0 0 24 24">'+k[1]+'</svg></span><span><b>'+k[2]+' · '+esc(x[1])+'</b><span class="sm mu">'+x[3]+'</span></span>'+icon(I.arr)+'</a>';}).join('')+'</div>';}
+
+/* ---------- PROJECTS ---------- */
+var PROJ=[
+{id:'prostir',t:'Простір «Артан»',tag:'Підтримка · 13+ міст',ic:'<path d="M4 20V10l8-6 8 6v10z"'+F+'/><path d="M9.500 20v-6h5v6"/>',d:'Перше в історії воєнної розвідки публічне представництво підрозділу, що працює за принципом відкритих дверей. Ветерани отримують юридичну й психологічну допомогу та консультації з працевлаштування, родини — підтримку, кандидати — співбесіду й супровід вступу. У деяких просторах цивільних навчають тактичної медицини, стрільби та FPV-пілотування.',a:[['#map','Карта просторів']],soc:[['tg','@artan_gur','https://t.me/artan_gur','Анонси подій у просторах'],['web','artan-gur.com','https://www.artan-gur.com/','Анкета для вступу']]},
+{id:'zvyt',t:'«Звитяга»',tag:'Молодь · з 2024 року',ic:I.flag,d:'Військово-патріотичні вишколи для підлітків і молоді 13–20 років. П\'ять днів з інструкторами «Артану»: такмед, топографія, керування дронами, рукопашний бій, поводження зі зброєю, лекції з історії та конкурс талантів. Уже понад 1,5 тисячі учасників.',a:[['#zvytiaha','Подати заявку']],soc:[['ig','@zvytiaha.artan','https://www.instagram.com/zvytiaha.artan/','Фото, відео й анонси вишколів']]},
+{id:'artx',t:'«Артан Х»',tag:'Підрозділ у складі «Артану»',ic:'<path d="M6 6l12 12M18 6L6 18"/>',d:'Штурмовий підрозділ у складі «Артану», майже повністю сформований з достроково звільнених добровольців. Девіз — «Від тіні минулого до світла перемоги». Воював на Харківському, Донецькому та Запорізькому напрямках. Командир — майор Андрій Мельник «Фаворит».',a:[['https://armyinform.com.ua/2026/06/25/u-kyyevi-prezentuvaly-dokumentalnyj-film-vyvezty-do-drugoyi-richnyczi-pidrozdilu-artan-h/','Фільм «Вивезти»',1]],soc:[['ig','@artan_x_gur','https://www.instagram.com/artan_x_gur/','Офіційна сторінка «Артан Х»']]},
+{id:'moto',t:'«Артан клан»',tag:'Мотоклуб',ic:'<circle cx="6" cy="16" r="3.500"'+F+'/><circle cx="18" cy="16" r="3.500"'+F+'/><path d="M6 16l3.500-6H14l4 6M9.500 10L8 7H6M14 10h2.500"/>',d:'Мотоклуб «Артан клан» — спільнота підрозділу на двох колесах. Фото, мотопробіги й новини клубу — на його сторінці в Instagram.',a:[],soc:[['ig','@artan.clan','https://www.instagram.com/artan.clan/','Офіційна сторінка мотоклубу']]},
+{id:'turn',t:'Турніри',tag:'Спорт',ic:'<path d="M8 4h8v4a4 4 0 0 1-8 0z"'+F+'/><path d="M8 5H5a3 3 0 0 0 3 4M16 5h3a3 3 0 0 1-3 4M12 12v4M8.500 20h7"/>',d:'Спортивні змагання під егідою підрозділу, у лавах якого воює багато спортсменів. Серед них — Всеукраїнський Кубок «Артану» з таїландського боксу серед дітей та молоді у Вінниці.',a:[],soc:[['fb','artan.gur','https://www.facebook.com/artan.gur','Фото й результати змагань']]},
+{id:'mural',t:'Мурал у Києві',tag:'Мистецтво',ic:'<rect x="3" y="5" width="18" height="14" rx="2"'+F+'/><path d="M3 15l5-5 4 4 3-3 6 6"/>',d:'Розпис на честь розвідників підрозділу на Центральному автовокзалі Києва, відкритий до річниці «Артану».',a:[],soc:[]},
+{id:'stamp',t:'Поштова марка',tag:'Пам\'ять',ic:'<path d="M5 3h14v18H5z"'+F+'/><path d="M8 7h8v7H8z"/>',d:'Лімітований тираж марки Укрпошти про бойовий шлях підрозділу — 1670 примірників, травень 2025 року.',a:[['https://gur.gov.ua/content/na-chest-voiniv-hur-ukrposhta-vypustyla-marku-prysviachenu-spetspidrozdilu-artan.html','Сайт ГУР',1]],soc:[]}
+];
+function vProjects(){return '<header class="top stack"><p class="ey">Більше, ніж фронт</p><h1>Проєкти «Артан»</h1><p class="sm mu">Ініціативи підрозділу для ветеранів, родин, молоді та всіх, хто хоче бути поруч.</p></header>'+
+'<div class="pjhero"><div class="card" style="padding:10px"><b style="font-family:Oswald,sans-serif;font-size:22px;color:var(--ye);display:block">13+</b><span class="sm mu">просторів</span></div><div class="card" style="padding:10px"><b style="font-family:Oswald,sans-serif;font-size:22px;color:var(--ye);display:block">19</b><span class="sm mu">вишколів</span></div><div class="card" style="padding:10px"><b style="font-family:Oswald,sans-serif;font-size:22px;color:var(--ye);display:block">'+PROJ.length+'</b><span class="sm mu">проєктів тут</span></div></div>'+
+PROJ.map(function(p){return '<article class="card pj"><div class="hd"><span class="ring">'+icon(p.ic)+'</span><div><span class="tag">'+p.tag+'</span><h2>'+p.t+'</h2></div></div><p class="sm" style="color:#D8D6CC">'+p.d+'</p>'+(p.soc&&p.soc.length?socList(p.soc):'')+(p.a.length?'<div class="acts">'+p.a.map(function(x){return '<a class="btn'+(x[0]==='#zvytiaha'?' pri':'')+'" href="'+x[0]+'"'+(x[2]?' target="_blank" rel="noopener"':'')+'>'+x[1]+' '+icon(I.arr)+'</a>';}).join('')+'</div>':'')+'</article>';}).join('')+
+'<p class="sm mu">Знаєте про інший проєкт «Артану»? Його легко додати сюди.</p>';}
+
+/* ---------- LEADERBOARD ---------- */
+var LB={db:null,uid:null,rows:[],state:'wait',unsub:null,timer:null,ro:false,pending:false};
+function lbInit(){if(!window.claude||!window.claude.use){LB.state='off';return;}
+Promise.all([window.claude.use('db'),window.claude.use('user')]).then(function(r){LB.db=r[0];var u=r[1];
+if(!LB.db||!u){LB.state='off';rerenderBoard();return;}
+return u.id().then(function(id){LB.uid=id;if(!id){LB.state='off';rerenderBoard();return;}
+LB.timer=setTimeout(function(){if(LB.state==='wait'){LB.state='slow';rerenderBoard();}},10000);
+try{LB.unsub=LB.db.collection('board').orderBy('xp','desc').limit(100).onSnapshot(function(snap){clearTimeout(LB.timer);LB.rows=snap.docs.map(function(d){var x=d.data()||{};return {id:d.id,call:String(x.call||'').slice(0,14),city:String(x.city||'').slice(0,24),xp:Math.max(0,Math.min(99999,+x.xp||0))};});LB.state='ok';rerenderBoard();},function(){clearTimeout(LB.timer);LB.state='off';rerenderBoard();});}catch(e){LB.state='off';}
+if(S.lbOn)lbPush();});}).catch(function(){LB.state='off';rerenderBoard();});}
+function lbPush(){if(!LB.db||!LB.uid||LB.ro||LB.pending)return;var ref=LB.db.doc('board/'+LB.uid);LB.pending=true;
+var p=S.lbOn&&S.call?ref.set({call:S.call,city:S.city||'',xp:S.xp,ts:Date.now()}):ref.delete();
+p.then(function(){LB.pending=false;},function(e){LB.pending=false;if(e&&e.code==='invalid_argument'){LB.ro=true;rerenderBoard();}});}
+var lbLast='';function lbSync(){var k=[S.lbOn,S.call,S.city,S.xp].join('|');if(k!==lbLast){lbLast=k;lbPush();}}
+function rerenderBoard(){var el=$('#lb');if(el)el.innerHTML=boardInner();}
+function vBoard(){return '<div class="card stack"><div class="tog"><div><b>Показувати мене в рейтингу</b><p class="sm mu">Видно лише позивний'+(S.city?', місто':'')+' і бали.</p></div><button class="sw" role="switch" aria-checked="'+!!S.lbOn+'" aria-label="Показувати мене в рейтингу" data-act="lbtog"></button></div>'+(S.lbOn&&!S.call?'<div class="msg no" role="alert">Спершу збережи позивний у жетоні вище.</div>':'')+'</div>'+
+'<div class="seg" role="tablist"><button role="tab" aria-selected="'+(ui.lbf!=='city')+'" class="'+(ui.lbf!=='city'?'on':'')+'" data-act="lbf" data-f="all">Уся Україна</button><button role="tab" aria-selected="'+(ui.lbf==='city')+'" class="'+(ui.lbf==='city'?'on':'')+'" data-act="lbf" data-f="city"'+(S.city?'':' disabled')+'>'+(S.city?esc(S.city):'Моє місто')+'</button></div><div id="lb">'+boardInner()+'</div>';}
+function boardInner(){
+if(LB.state==='off')return '<div class="card stack"><h3>Спільний рейтинг недоступний тут</h3><p class="sm mu">Рейтинг між дітьми працює, коли застосунок відкрито через Claude з входом в обліковий запис. Твої бали все одно рахуються.</p>'+meRow()+'</div>';
+if(LB.state==='wait')return '<p class="sm mu" role="status">Завантаження рейтингу…</p>';
+var rows=LB.rows.filter(function(r){return r.call&&(ui.lbf!=='city'||(S.city&&r.city.toLowerCase()===S.city.toLowerCase()));});
+var h=(LB.state==='slow'?'<p class="sm mu">Рейтинг поки не відповідає, дані можуть бути неповні.</p>':'')+(LB.ro?'<div class="msg no">У тебе немає дозволу додавати себе до рейтингу в цьому застосунку. Можна лише переглядати.</div>':'');
+if(!rows.length)return h+'<div class="card stack" style="text-align:center"><div class="big" aria-hidden="true">🏅</div><h3>Рейтинг ще порожній</h3><p class="sm mu">Увімкни участь вище і стань першим захисником у списку.</p></div>';
+return h+'<ol class="lb" style="list-style:none;margin:0;padding:0">'+rows.slice(0,50).map(function(r,i){var me=r.id===LB.uid;return '<li class="lbr'+(me?' me':'')+'" style="animation-delay:'+(i*.04)+'s"><span class="pl">'+(i+1)+'</span><span><b>«'+esc(r.call)+'»'+(me?' · це ти':'')+'</b><span class="sm mu">'+(r.city?esc(r.city)+' · ':'')+rankOf(r.xp)+'</span></span><span class="xp">'+r.xp+'</span></li>';}).join('')+'</ol>';}
+function rankOf(x){var n=RANKS[0][1];for(var i=0;i<RANKS.length;i++)if(x>=RANKS[i][0])n=RANKS[i][1];return n;}
+function meRow(){return '<div class="lbr me"><span class="pl">—</span><span><b>«'+esc(S.call||'Без позивного')+'»</b><span class="sm mu">'+(S.city?esc(S.city)+' · ':'')+rankOf(S.xp)+'</span></span><span class="xp">'+S.xp+'</span></div>';}
+
+/* ---------- ROUTER ---------- */
+var VIEWS={diploma:vDiploma,projects:vProjects,coins:vProjects,home:vHome,unit:vUnit,map:vMap,school:vSchool,zvytiaha:vZv,more:vMore,merch:vMerch,social:vSocial,sos:vSos},ORDER=['home','unit','map','school','more'];
+function tab(){var t=(location.hash||'#home').slice(1);return VIEWS[t]?t:'home';}
+function render(top){clearTimers();if(mapInst){try{mapInst.destroy();}catch(e){}mapInst=null;}var t=tab(),nt=ORDER.indexOf(t)>-1?t:(t==='diploma'?'school':'more');app.innerHTML='<div class="view stack">'+VIEWS[t]()+'</div>';
+var as=document.querySelectorAll('nav a');for(var i=0;i<as.length;i++){var on=as[i].getAttribute('data-tab')===nt;as[i].className=on?'on':'';if(on)as[i].setAttribute('aria-current','page');else as[i].removeAttribute('aria-current');}
+$('#pill').style.transform='translateX('+(ORDER.indexOf(nt)*100)+'%)';
+requestAnimationFrame(function(){var b=document.querySelectorAll('.bar i[data-w]');for(var i=0;i<b.length;i++)b[i].style.width=b[i].getAttribute('data-w')+'%';});
+if(t==='home'){car();every(function(){ui.car=(ui.car+1)%OPS.length;car();},5000);every(function(){var s=$('#sil');if(s)s.textContent=silence();},30000);}
+if(t==='map'){mountMap();spaceCard(false);}
+if(t==='unit'&&!S.unitSeen){S.unitSeen=true;save();}
+if(t==='school'&&ui.game){var box=$('#game');({touch:startTouch,pack:startPack,mem:startMem,morse:startMorse})[ui.game](box);}
+if(top)window.scrollTo(0,0);}
+var pendOp=null;window.addEventListener('hashchange',function(){ui.op=pendOp;pendOp=null;if(tab()==='diploma'&&ui.dip&&!ui.dip.url&&!ui.dip.busy)ui.dip=null;ui.mission=null;ui.game=null;render(true);});
+
+document.addEventListener('click',function(e){var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act'),m;
+if(a==='op'){S.opsSeen=S.opsSeen||{};if(!S.opsSeen[b.getAttribute('data-id')]){S.opsSeen[b.getAttribute('data-id')]=1;save();}ui.seg='ops';if(tab()==='unit'){ui.op=b.getAttribute('data-id');render(true);}else{pendOp=b.getAttribute('data-id');location.hash='#unit';}}
+else if(a==='opback'){ui.op=null;render(true);}
+else if(a==='seg'){ui.seg=b.getAttribute('data-s');if(tab()==='unit'&&b.tagName==='BUTTON')render();}
+else if(a==='car'){ui.car=+b.getAttribute('data-i');car();}
+else if(a==='candle'){S.candle=!S.candle;save();$('#cnd').className='cdl'+(S.candle?' lit':' out');$('#cndt').textContent=S.candle?'Свічка пам\'яті горить. Дякуємо, що пам\'ятаєте.':'Запаліть свічку в пам\'ять про полеглих.';b.textContent=S.candle?'Погасити свічку':'Запалити свічку';b.className=S.candle?'':'pri';}
+else if(a==='space'){ui.space=+b.getAttribute('data-i');if(!S.mapSeen){S.mapSeen=true;save();}spaceCard(b.tagName==='BUTTON');}
+else if(a==='zstart'){if(ui.zf.step===0)ui.zf.step=1;}
+else if(a==='znext'){ui.zf.step=1;render(true);}
+else if(a==='zback'){ui.zf.err='';ui.zf.step--;render(true);}
+else if(a==='zreset'){ui.zf={step:0,d:{}};render(true);}
+else if(a==='zdis'){var d=ui.zf.d;d.dis=d.dis||[];var i=+b.getAttribute('data-i'),k=d.dis.indexOf(i);if(k>-1)d.dis.splice(k,1);else d.dis.push(i);var on=k===-1;b.className='chip'+(on?' on':'');b.setAttribute('aria-pressed',on);}
+else if(a==='age'){S.age=+b.getAttribute('data-a');save();render();}
+else if(a==='mission'){ui.mission=b.getAttribute('data-id');ui.q=-1;ui.ans=null;ui.score=0;render(true);}
+else if(a==='mback'){ui.mission=null;ui.game=null;render(true);}
+else if(a==='qstart'){ui.q=0;render(true);}
+else if(a==='ans'){m=MISSIONS.filter(function(x){return x.id===ui.mission;})[0];ui.ans=+b.getAttribute('data-i');if(ui.ans===m.q[ui.q][2])ui.score++;render();}
+else if(a==='qnext'){m=MISSIONS.filter(function(x){return x.id===ui.mission;})[0];ui.q++;ui.ans=null;if(ui.q>=m.q.length){ui.gain=award(m.id,ui.score*10);if(ui.score===m.q.length)confetti();}render(true);}
+else if(a==='game'){ui.game=b.getAttribute('data-g');render(true);}
+else if(a==='callgen'){var cs=['Сокіл','Беркут','Грім','Вітер','Барс','Яструб','Скеля','Іскра','Ватра','Зоря','Рись','Шторм'];$('#call').value=cs[Math.floor(Math.random()*cs.length)];}
+else if(a==='callsave'){S.call=$('#call').value.trim().slice(0,14);S.city=$('#city').value.trim().slice(0,24);ui.editId=false;save();render();}
+else if(a==='editid'){ui.editId=true;render();}
+else if(a==='ss'){ui.ss=b.getAttribute('data-s');render();}
+else if(a==='lbf'){ui.lbf=b.getAttribute('data-f');render();}
+else if(a==='lbtog'){S.lbOn=!S.lbOn;save();render();}
+else if(a==='msize'){ui.msize[b.getAttribute('data-id')]=b.getAttribute('data-z');var sb=b.parentNode.children;for(var j=0;j<sb.length;j++){var o2=sb[j]===b;sb[j].className=o2?'on':'';sb[j].setAttribute('aria-pressed',o2);}}
+else if(a==='madd'){var pm=MERCH[+b.getAttribute('data-i')],sz=pm.sz?(ui.msize[pm.id]||'M'):'',ex=ui.cart.filter(function(c){return c.id===pm.id&&c.s===sz;})[0];if(ex)ex.q++;else ui.cart.push({id:pm.id,n:pm.n,s:sz,q:1});ui.cartMsg=false;var cn=$('#cartn');cn.textContent=cartCount();cn.classList.remove('b');void cn.offsetWidth;cn.classList.add('b');b.textContent='Додано ✓';setTimeout(function(){b.textContent='До кошика';},900);if(ui.cartOpen)render();}
+else if(a==='mcart'){ui.cartOpen=!ui.cartOpen;render();}
+else if(a==='mrem'){ui.cart.splice(+b.getAttribute('data-i'),1);ui.cartMsg=false;render();}
+else if(a==='mcheck'){ui.cartMsg=true;render();}
+else if(a==='dmode'){var el=$('#dname');ui.dip.name=el?el.value:'';if(ui.dip.mode!==b.getAttribute('data-m')){ui.dip.mode=b.getAttribute('data-m');ui.dip.name=ui.dip.mode==='call'?(S.call||''):'';}render();}
+else if(a==='dgen'){dGen();}
+else if(a==='dsave'){dSave();}
+else if(a==='back'){history.length>1?history.back():(location.hash='#school');}
+else if(a==='daily'){var t=today();if(S.daily!==t){var y=new Date();y.setDate(y.getDate()-1);var ys=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();S.streak=S.daily===ys?(S.streak||0)+1:1;S.daily=t;S.xp+=5;save();confetti();}render();}
+});
+document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('g.pin')){e.preventDefault();ui.space=+e.target.getAttribute('data-i');spaceCard(false);}});
+document.addEventListener('change',function(e){var t=e.target;if(t.id==='ph'&&t.files&&t.files[0]){var id=t.getAttribute('data-op');try{if(photos[id])URL.revokeObjectURL(photos[id]);photos[id]=URL.createObjectURL(t.files[0]);dbPut(id,t.files[0]);}catch(err){}render();}});
+document.addEventListener('submit',function(e){if(e.target.id==='zf'){e.preventDefault();zSubmit();}});
+var DB=null;
+function dbPut(id,blob){try{if(DB)DB.transaction('p','readwrite').objectStore('p').put(blob,id);}catch(e){}}
+try{var rq=indexedDB.open('artan-photos',1);rq.onupgradeneeded=function(){rq.result.createObjectStore('p');};rq.onsuccess=function(){DB=rq.result;try{var st=DB.transaction('p').objectStore('p'),cur=st.openCursor(),n=0;cur.onsuccess=function(){var c=cur.result;if(c){try{photos[c.key]=URL.createObjectURL(c.value);n++;}catch(e){}c.continue();}else if(n&&(tab()==='unit'||tab()==='home')&&!ui.game)render();};}catch(e){}};}catch(e){}
+render();
+setTimeout(lbInit,0);
+setTimeout(function(){document.getElementById('splash').className='out';},2300);
+})();
+</script>
+</body>
+</html>
