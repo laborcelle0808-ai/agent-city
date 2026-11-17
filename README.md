@@ -92,7 +92,7 @@
 | `usability-tester` | Понятность для людей, путь до цели |
 | `game-tester` | Игры, Mini Apps, интерактив, FPS |
 
-## 🧰 Скиллы (30)
+## 🧰 Скиллы (33)
 **SMM:** `smm-strategy`, `content-plan`, `post-writing`, `hashtag-research`, `video-script`, `ad-campaign`, `analytics-report`
 **Дизайн:** `brand-guidelines`, `social-graphics`, `design-system`, `ux-audit`
 **Арт и анимация:** `art-direction`, `animation-craft`, `svg-illustration`, `3d-web`, `video-editing`, `ai-image-prompts`
@@ -100,6 +100,7 @@
 **Безопасность:** `pentest-methodology`, `vuln-report`, `security-hardening`
 **Тестирование:** `test-strategy`, `e2e-playwright`, `api-testing`, `performance-testing`, `accessibility-testing`
 **Общие:** `launch-checklist`
+**Стиль ответов (сторонние, [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman), MIT):** `caveman` — коротко, без воды · `ultracave` — максимальное сжатие · `megacave` — классический китайский. Включение: `/caveman`, выключение: `stop caveman`.
 
 ## 🚀 Как пользоваться
 Откройте Claude Code в папке `agent-city` и пишите задачи, например:
