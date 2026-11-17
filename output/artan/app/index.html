@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Артан — тестовий застосунок</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600&family=Ruslan+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@500;600;700&family=Ruslan+Display&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0A0B09;--sf:#151712;--sf2:#1E211A;--ln:#32372B;--tx:#EDEBE2;--mu:#A9AD9D;--ac:#C3C79A;--ye:#F2C230;--ok:#7BC47F;--bad:#EE8D7C;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -238,6 +238,7 @@ details{border:1px solid var(--ln);border-radius:14px;background:var(--sf);paddi
 .soc>svg{color:var(--mu);width:16px;height:16px}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
+<link rel="stylesheet" href="css/tablet.css">
 </head>
 <body>
 <div id="splash" role="status" aria-label="Завантаження застосунку Артан">
@@ -259,19 +260,19 @@ window.ArtanExt={game:function(g){ARTAN_EXT.games.push(g);},mission:function(m){
 <script src="js/ext/media.js"></script>
 <script src="js/ext/events.js"></script>
 <script src="js/ext/parents.js"></script>
-<nav aria-label="Розділи"><div class="in"><span class="pill" id="pill"></span>
-<a href="#home" data-tab="home"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Головна</a>
-<a href="#unit" data-tab="unit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Підрозділ</a>
-<a href="#map" data-tab="map"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.200 7-11a7 7 0 0 0-14 0c0 4.800 7 11 7 11z"/><circle cx="12" cy="10" r="2.500"/></svg>Карта</a>
-<a href="#school" data-tab="school"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.500-3.200 7.800-8 9-4.800-1.200-8-4.500-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Школа</a>
-<a href="#more" data-tab="more"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.500" height="6.500" rx="1.800"/><rect x="13.500" y="4" width="6.500" height="6.500" rx="1.800"/><rect x="4" y="13.500" width="6.500" height="6.500" rx="1.800"/><rect x="13.500" y="13.500" width="6.500" height="6.500" rx="1.800"/></svg>Більше</a>
-</div></nav>
+<nav class="dock" aria-label="Розділи"><span id="pill" hidden></span>
+<a href="#home" data-tab="home"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5v8l-9 5-9-5V8z"/><path d="M12 8v8M8 10.5l4 2.5 4-2.5"/></svg><span>Штаб</span></a>
+<a href="#unit" data-tab="unit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>Підрозділ</span></a>
+<button type="button" class="dock-radar" id="radarBtn" aria-haspopup="dialog" aria-expanded="false" aria-label="Усі сектори"><span class="dr-ring" aria-hidden="true"></span><img src="img/emblem.png" alt=""></button>
+<a href="#school" data-tab="school"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c3-1 3-5 6-6s5 1 7-2 1-6 3-8"/><circle cx="4" cy="20" r="1.6"/><circle cx="20" cy="4" r="1.6"/></svg><span>Шлях</span></a>
+<a href="#map" data-tab="map"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Карта</span></a>
+</nav>
 <script>
 (function(){
 var KEY='artan-test-v2';/* v3 */
 var S={xp:0,done:{},age:null,candle:false,daily:'',streak:0,call:'',city:'',lbOn:false};
 try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);for(var k in o)S[k]=o[k];}}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}if(typeof lbSync==='function')lbSync();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}if(typeof lbSync==='function')lbSync();if(window.ArtanTablet&&ArtanTablet.onSave)ArtanTablet.onSave();}
 var app=document.getElementById('app'),photos={},timers=[];
 var ui={op:null,seg:'ops',mission:null,q:0,ans:null,score:0,game:null,car:0,space:null,zf:{step:0,d:{}},ss:'learn',lbf:'all',cart:[],msize:{},cartOpen:false,cartMsg:false};
 function $(s,r){return (r||document).querySelector(s);}
@@ -628,14 +629,14 @@ function meRow(){return '<div class="lbr me"><span class="pl">—</span><span><b
 /* ---------- ROUTER ---------- */
 var VIEWS={diploma:vDiploma,projects:vProjects,coins:vProjects,home:vHome,unit:vUnit,map:vMap,school:vSchool,zvytiaha:vZv,more:vMore,merch:vMerch,social:vSocial,sos:vSos},ORDER=['home','unit','map','school','more'];
 var extClean=null;
-var API={S:S,save:save,ui:ui,award:award,gEnd:gEnd,gHead:gHead,shuffle:shuffle,later:later,every:every,confetti:confetti,esc:esc,icon:icon,I:I,rank:rank,render:render,today:today,photos:photos,MISSIONS:MISSIONS,SPACES:SPACES,OPS:OPS,HIST:HIST,AGES:AGES,
+var API={S:S,save:save,ui:ui,award:award,gEnd:gEnd,gHead:gHead,shuffle:shuffle,later:later,every:every,confetti:confetti,esc:esc,icon:icon,I:I,rank:rank,render:render,today:today,photos:photos,MISSIONS:MISSIONS,SPACES:SPACES,OPS:OPS,HIST:HIST,AGES:AGES,VIEWS:VIEWS,RANKS:RANKS,EXT:EXT,silence:silence,
   dl:function(){return window.claude&&window.claude.use?window.claude.use('downloads'):Promise.resolve(null);}};
 EXT.views.forEach(function(v){if(!VIEWS[v.id])VIEWS[v.id]=function(){try{return v.render(API);}catch(err){console.error(err);return '<div class="card">Розділ тимчасово недоступний.</div>';}};});
 window.ArtanAPI=API;
 function tab(){var t=(location.hash||'#home').slice(1);return VIEWS[t]?t:'home';}
 function render(top){clearTimers();if(extClean){try{extClean();}catch(e){}extClean=null;}if(mapInst){try{mapInst.destroy();}catch(e){}mapInst=null;}var t=tab(),nt=ORDER.indexOf(t)>-1?t:(t==='diploma'?'school':'more');app.innerHTML='<div class="view stack">'+VIEWS[t]()+'</div>';
 var as=document.querySelectorAll('nav a');for(var i=0;i<as.length;i++){var on=as[i].getAttribute('data-tab')===nt;as[i].className=on?'on':'';if(on)as[i].setAttribute('aria-current','page');else as[i].removeAttribute('aria-current');}
-$('#pill').style.transform='translateX('+(ORDER.indexOf(nt)*100)+'%)';
+
 requestAnimationFrame(function(){var b=document.querySelectorAll('.bar i[data-w]');for(var i=0;i<b.length;i++)b[i].style.width=b[i].getAttribute('data-w')+'%';});
 if(t==='home'){car();every(function(){ui.car=(ui.car+1)%OPS.length;car();},5000);every(function(){var s=$('#sil');if(s)s.textContent=silence();},30000);}
 if(t==='map'){mountMap();spaceCard(false);}
@@ -689,8 +690,10 @@ function dbPut(id,blob){try{if(DB)DB.transaction('p','readwrite').objectStore('p
 try{var rq=indexedDB.open('artan-photos',1);rq.onupgradeneeded=function(){rq.result.createObjectStore('p');};rq.onsuccess=function(){DB=rq.result;try{var st=DB.transaction('p').objectStore('p'),cur=st.openCursor(),n=0;cur.onsuccess=function(){var c=cur.result;if(c){try{photos[c.key]=URL.createObjectURL(c.value);n++;}catch(e){}c.continue();}else if(n&&(tab()==='unit'||tab()==='home')&&!ui.game)render();};}catch(e){}};}catch(e){}
 render();
 setTimeout(lbInit,0);
+window.ArtanBoot=true;
 setTimeout(function(){document.getElementById('splash').className='out';},2300);
 })();
 </script>
+<script src="js/tablet.js"></script>
 </body>
 </html>
