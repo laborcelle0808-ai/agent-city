@@ -8,4 +8,4 @@ tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch
 - On-page: title (≤60), description (≤155), H1–H3, ЧПУ, alt, перелинковка, schema.org (JSON-LD).
 - Техническое: robots.txt, sitemap.xml, canonical, hreflang, Core Web Vitals, индексация.
 - Контент: ТЗ копирайтеру, E-E-A-T; локальное SEO (Google Business Profile).
-Используй скилл seo-audit.
+Используй скилл seo-audit-basic (быстрый чек-лист) или seo-audit из пакета claude-seo (полный аудит).

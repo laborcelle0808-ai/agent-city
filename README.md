@@ -92,14 +92,15 @@
 | `usability-tester` | Понятность для людей, путь до цели |
 | `game-tester` | Игры, Mini Apps, интерактив, FPS |
 
-## 🧰 Скиллы (35)
+## 🧰 Скиллы (64)
 **SMM:** `smm-strategy`, `content-plan`, `post-writing`, `hashtag-research`, `video-script`, `ad-campaign`, `analytics-report`
 **Дизайн:** `brand-guidelines`, `social-graphics`, `design-system`, `ux-audit`
 **Арт и анимация:** `art-direction`, `animation-craft`, `svg-illustration`, `3d-web`, `video-editing`, `ai-image-prompts`
-**Разработка:** `landing-page`, `telegram-bot`, `seo-audit`, `code-review-checklist`
+**Разработка:** `landing-page`, `telegram-bot`, `seo-audit-basic`, `code-review-checklist`
 **Безопасность:** `pentest-methodology`, `vuln-report`, `security-hardening`
 **Тестирование:** `test-strategy`, `e2e-playwright`, `api-testing`, `performance-testing`, `accessibility-testing`
 **Общие:** `launch-checklist`
+**SEO-пакет (сторонний, [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo), MIT):** 29 скиллов `seo`, `seo-audit`, `seo-technical`, `seo-content`, `seo-schema`, `seo-geo`, `seo-local`, `seo-sitemap`, `seo-plan` и др. + 20 SEO-агентов (`seo-technical`, `seo-content`, `seo-geo`…). Скрипты: `.claude/skills/seo/scripts/`, зависимости Python — `.claude/skills/seo/requirements.txt`.
 **Артефакты (официальный, [anthropics/skills](https://github.com/anthropics/skills)):** `web-artifacts-builder` — сложные артефакты на React + TypeScript + Tailwind + shadcn/ui, сборка в один HTML.
 **UI/UX (сторонний, [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), MIT):** `ui-ux-pro-max` — стили, палитры, шрифтовые пары, 120 UX-правил, поиск по локальной базе.
 **Стиль ответов (сторонние, [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman), MIT):** `caveman` — коротко, без воды · `ultracave` — максимальное сжатие · `megacave` — классический китайский. Включение: `/caveman`, выключение: `stop caveman`.

@@ -10,6 +10,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch
 **Квартал Дизайна:** ui-ux-designer, brand-designer, social-graphic-designer, motion-designer, presentation-designer
 **Арт-квартал (сильные дизайнеры и аниматоры):** art-director, creative-web-designer, illustrator, 3d-designer, character-animator, webgl-motion-artist, video-editor, ai-visual-artist
 **Технопарк (Разработка):** web-architect, frontend-dev, backend-dev, fullstack-site-builder, mobile-dev, desktop-python-dev, bot-developer, automation-engineer, database-engineer, devops-engineer, code-reviewer, security-auditor, seo-specialist
+**SEO-бюро (пакет claude-seo):** seo-technical, seo-content, seo-schema, seo-geo, seo-local, seo-sitemap, seo-performance, seo-backlinks, seo-cluster, seo-sxo и другие seo-* агенты
 **Кибер-квартал (этичные хакеры, только с разрешением владельца):** pentest-lead, web-pentester, api-hacker, recon-analyst, cloud-security-hacker, mobile-security-tester, bug-bounty-hunter, incident-responder
 **Испытательный полигон (тестировщики):** qa-lead, qa-tester, e2e-automation-engineer, api-tester, performance-tester, accessibility-tester, visual-regression-tester, usability-tester, game-tester
 
